@@ -1,0 +1,9 @@
+#! /bin/bash
+
+env=$1
+if [[ -z "$env" ]]
+then
+	env="development"
+fi
+rm -rf public/assets
+bundle exec rake RAILS_ENV=$env assets:precompile

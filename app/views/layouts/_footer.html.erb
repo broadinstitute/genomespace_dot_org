@@ -1,0 +1,13 @@
+<h2>Other Actions</h2>
+<table style="margin-top: 10px;">
+	<tr><td>
+		<%= form_for(:action, :url => route_action_path) do %>
+		<%= label_tag :action_path, "What else would you like to edit?" %>
+		<%= select_tag :action_path, options_for_select(available_actions), {:include_blank => true, :onchange => 'this.form.submit()'} %>
+		<% end %>
+	</td><td>
+		<%= button_to "View Live Site", site_path, {:method => "get"} %>
+	</td><td>
+		<%= button_to "Logout", destroy_user_session_path, {:method => "delete"} %>
+	</td></tr>
+</table>

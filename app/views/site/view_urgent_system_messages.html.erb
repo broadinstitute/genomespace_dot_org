@@ -1,0 +1,6 @@
+<h1>System Status: <span style="color:red;">Urgent</span></h1>
+<% @system_messages.each do |system_message| %>
+	<p class="byline">As of: <%= system_message.display_date %></p>
+	<%= system_message.content.html_safe %>
+	<hr />
+<% end %>

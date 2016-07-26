@@ -1,0 +1,81 @@
+<%= form_for(@page) do |f| %>
+  <% if @page.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@page.errors.count, "error") %> prohibited this page from being saved:</h2>
+
+      <ul>
+      <% @page.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+	<%= f.hidden_field :lock_version %>
+  <div class="field">
+    <%= f.label :title %><br />
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+    <%= f.label :showTitle, "Display title (Whether to display the title at the top of the page)" %><br />
+    <%= f.select :showTitle, options_for_select([["Yes", 1],["No", 0]], @page.showTitle? ? 1 : 0) %>
+  </div>
+  <div class="field">
+    <%= f.label :url, "URL (you can leave this blank to auto-generate a url based on the page title)." %><br />
+    <%= f.text_field :url %>
+  </div>
+  <div class="field">
+  	<%= f.label :category, "Category - select a category to control which popup menu this page will appear in.  You can customize the order on the #{link_to 'Menu Items page', menu_items_path} once the page has been created.  Leave this blank to take this page out of the menu structure.".html_safe %><br />
+  	<%= f.select :category, options_for_select(nav_menu_categories, @page.category ), { :include_blank => true } %>
+  </div>
+  <div class="field">
+    <%= f.label :landing_page, "Top level landing page for this category? (This will take it out of the dropdown menu and make the top level item a link to this page)" %><br />
+    <%= f.select :landing_page, options_for_select([["Yes", 1],["No", 0]], @page.landing_page? ? 1 : 0 ) %>
+</div>
+  <div class="field">
+		<div class="inner">
+		  <%= f.label :desc, "Page Description (a short blurb to be displayed in the menu)." %><br />
+		  <%= f.text_area :desc, :size => "60x5" %>
+  	</div>
+  </div>
+  <div class="field">
+    <%= f.label :home_page %><br />
+    <%= f.select :home_page, options_for_select([["Yes", 1],["No", 0]], @page.home_page? ? 1 : 0 ) %>
+  </div>
+  <div class="field">
+    <%= f.label :published, "Published (unpublished pages will not appear in the menus and require authentication to view)." %><br />
+    <%= f.select :published, options_for_select([["Yes", 1],["No", 0]], @page.published? ? 1 : 0 ) %>
+  </div>
+  <div class="field">
+    <%= f.label :team_page, "Team Page (this will put a link to this page at the bottom of \"/team/deliverables\" and require authentication to view.  Team pages will also not appear in the menus)." %><br />
+    <%= f.select :team_page, options_for_select([["Yes", 1],["No", 0]], @page.team_page? ? 1 : 0 ) %>
+  </div>
+  <div class="field">
+    <%= f.label :dev, "Version in Dev (setting this flag will only make this revision viewable to logged-in users.  All other users see the last live version)." %><br />
+    <%= f.select :dev, options_for_select([["Yes", 1],["No", 0]], @page.dev? ? ["Yes", 1] : ["No", 0]) %>
+  </div>
+  <div class="field">
+    <%= f.label :content %><br />
+    <%= f.cktext_area :content %>
+  </div>
+  <%= f.hidden_field :updated_by, :value => current_user.email %>
+  <%= f.hidden_field :created_by, :value => current_user.email %>
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+<% end %>
+
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.page_content.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+		
+		$("#page_title").change(function() {
+			var title = getTextForUrl("page_title");
+			$("#page_url").val(title);
+		});
+		
+
+<% end %>

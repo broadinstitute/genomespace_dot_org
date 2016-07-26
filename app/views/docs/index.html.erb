@@ -1,0 +1,67 @@
+<h1>GenomeSpace API Documentation</h1>
+<table id="filter_search">
+	<tr><td>
+		<%= form_tag docs_path, {:method => "get"} do %>
+			<%= label_tag :view, "Available Actions:" %>
+			<%= select_tag :view, options_for_select([["Your Last Edited Doc", "last"],["Deprecated Docs", "deprecated"]]), { :include_blank => true, :onchange => 'this.form.submit()'} %>
+			<% end %>
+	</td><td>
+	<%= render "/layouts/admin_search" %>
+	</td>
+</table>
+<table id="pages">
+	<thead>
+  <tr>
+    <th>Component</th>
+    <th>Url</th>
+    <th>Version</th>
+    <th>Deprecated?</th>
+    <th>Updated by</th>
+    <th>Contents</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+	</thead>
+	<tbody>
+<% @docs.each do |doc| %>
+  <tr>
+    <td><%= doc.component %></td>
+    <td><%= doc.url %></td>
+    <td><%= doc.get_version %></td>
+    <td><%= doc.deprecated? ? "Yes" : "No" %></td>
+    <td><%= doc.versions.blank? ? doc.created_by : doc.versions.last.user_name %></td>
+    <td><center><%= link_to image_tag("view.gif"), support_docs_url(doc) %></center></td>
+    <td><%= doc.version == 1 ? "N/A" : link_to('Revisions', show_doc_revisions_path(doc)) %></td>
+    <td><%= link_to 'Edit', edit_doc_path(doc) %></td>
+    <td><%= link_to 'Destroy', doc, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[0, "asc"],[2, "desc"]]
+	        
+	    });
+	} );
+
+<% end %>
+
+<br />
+<table><tr><td>
+<%= button_to 'New Doc', new_doc_path, {:method => "get"} %></td><td><strong>OR COPY (non-deprecated):</strong></td>
+<td><div id="copy_doc">
+	<%= form_tag copy_doc_path, { :method => "get" } do |f| %>
+		<%= label_tag "Component:" %>
+		<%= select_tag :id, options_from_collection_for_select(@latest_docs, :id, :component) %>
+		<%= label_tag "New Major/Minor Version?" %>
+		<%= select_tag :version, options_for_select(["major", "minor"]) %>
+		<%= submit_tag "Copy Doc", :name => nil %>
+	<% end %>
+</div></td></tr></table>

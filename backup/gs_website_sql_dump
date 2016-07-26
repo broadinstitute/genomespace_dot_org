@@ -1,0 +1,41 @@
+#! /bin/bash
+
+# Dump entire database of the GenomeSpace rails site to an sql file and compress for long-term storage.
+# Files will be date stamped in the filename for retrieval.
+#
+# Author: Jon Bistline <bistline@broadinstitute.org>
+# Date: 1.24.2012
+
+# set database name
+
+db=$1
+if [[ -z "$db" ]]
+then
+	db="genomespace_production"
+fi
+
+# set up environment variables for filename
+file_date=`date +%Y-%m-%d`
+filename=$file_date"_gs_website_db.sql"
+
+cd /xchip/genepattern/gs_website_db_archive
+
+# unzip the last file in the directory, always will be the most recent file due to naming convention
+previous_filename=`ls -l | tail -1 | awk '{print $NF}'`
+gunzip $previous_filename
+previous_filename=`echo $previous_filename | sed 's/\.gz//'`
+
+# dump database & remove timestamp at end so that md5 checksum will work between files
+mysqldump -u genomespace -pc4nc3r -h mysql-prd1 $db | sed '$d' > $filename
+
+# compare md5 checksums, save file only if checksum differs
+current_md5=`md5sum $filename | awk '{ print $1 }'`
+previous_md5=`md5sum $previous_filename | awk '{ print $1 }'`
+if [ "$current_md5" != "$previous_md5" ]; then 
+	gzip $filename
+else
+	rm $filename
+fi
+
+# recompress old archive
+gzip $previous_filename

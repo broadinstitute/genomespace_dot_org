@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  tool_id: 1
+  title: MyString
+  url: MyString
+
+two:
+  tool_id: 1
+  title: MyString
+  url: MyString

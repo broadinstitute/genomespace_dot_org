@@ -1,0 +1,79 @@
+<p id="alert"><%= @flash_alert %></p>
+<table id="guide_sections_table">
+<thead>
+  <tr>
+    <th>Display Order</th>
+    <th>Title</th>
+    <th>Nest Under?</th>
+    <th>Display URL</th>
+    <th>Version in Dev?</th>
+    <th>Published?</th>
+    <th>Updated by</th>
+    <th>Last Updated</th>
+    <th>Date Created</th>
+    <th>Preview</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+</thead>
+<tbody id="guide_sections_list" class="sortable">
+<% @guide_sections.each do |guide_section| %>
+  <%= "<tr id=\"guide_section_#{guide_section.id}\">".html_safe %>
+  	<td width="10%"><center><%= guide_section.check_denesting? ? link_to_function(image_tag("denest_on.png"), "deNestGuideSection('#{guide_section.id}')".html_safe, :class => "denest_guide_section") : image_tag("denest_off.png") %><%= guide_section.display_order %><%= guide_section.check_nesting? ? link_to_function(image_tag("nest_on.png"), "nestGuideSection('#{guide_section.id}')".html_safe, :class => "nest_guide_section") : image_tag("nest_off.png") %></center></td>
+  	<td><%= guide_section.get_nesting_display.html_safe %> <%= guide_section.title %></td>
+  	<td><%= guide_section.parent_id.nil? ? "N/A" : truncate(GuideSection.find(guide_section.parent_id).title, :length => 25)%></td>
+  	<td><%= guide_section.display_url %></td>
+  	<td><%= guide_section.dev? ? "Yes" : "No" %></td>
+  	<td><%= guide_section.published? ? "Yes" : "No" %></td>
+  	<td><%= guide_section.versions.blank? ? guide_section.created_by : guide_section.versions.last.user_name %></td>
+  	<td><%= guide_section.updated_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+  	<td><%= guide_section.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+    <td><center><%= link_to image_tag("view.gif"), toc_url(@guide, guide_section) %></center></td>
+    <td><%= guide_section.version == 1 ? "N/A" : link_to('Revisions', show_guide_section_revisions_path(@guide, guide_section)) %></td>
+    <td><%= link_to 'Edit', edit_guide_guide_section_path(@guide, guide_section) %></td>
+    <td><%= link_to 'Destroy', guide_guide_section_path(@guide, guide_section), confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(function() { 
+	  $("#guide_sections_table tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "reorder_guide_sections",
+	  			data: $("#guide_sections_table tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+	
+	function nestGuideSection( guide_section_id ) {
+		$.ajax({
+			type: 'POST',
+			url: "nest_guide_section/" + guide_section_id
+		});
+	};
+	
+	function deNestGuideSection( guide_section_id ) {
+		$.ajax({
+			type: 'POST',
+			url: "denest_guide_section/" + guide_section_id
+		});
+	};
+	
+	$(document).ready(function() {
+	    oTable = $('#guide_sections_table').dataTable({
+	        "bJQueryUI": true,
+	        "bSort": false,
+	        "iDisplayLength": 100,
+	        "bFilter": false,
+	        "bLengthChange": false,
+	        "bPaginate": false,
+	    });
+	} );
+<% end %>

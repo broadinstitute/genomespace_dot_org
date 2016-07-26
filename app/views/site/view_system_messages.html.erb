@@ -1,0 +1,9 @@
+<h1>System Status</h1>
+<% @system_messages.each do |system_message| %>
+	<p class="byline">As of: <%= system_message.display_date %>, Priority: <%= system_message.priority_format.html_safe %></p>
+	<%= system_message.content.html_safe %>
+	<hr />
+<% end %>
+	
+	<div class="center"><%= page_entries_info @system_messages %><br />
+	<%= will_paginate @system_messages %></div>

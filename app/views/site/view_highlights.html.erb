@@ -1,0 +1,17 @@
+<% if params[:url] %>
+	<h1><%= @highlight.title %>
+	<% if user_signed_in? %>
+		<%= current_user.cms_admin? ? edit_button(@highlight) : nil %>
+	<% end %>
+	</h1>
+	<%= @highlight.dev? ? "<p style='color: red;'>This highlight is a dev revision.</p>".html_safe : nil %>
+	<%= @highlight.content.html_safe %>
+<% else %>
+	<% @highlights.each do |highlight| %>
+		<h1><%= link_to highlight.title, view_highlights_path(url: highlight.url) %></h1>
+		<%= highlight.content.html_safe %>
+	<% end %>
+	
+	<div class="center"><%= page_entries_info @highlights %><br />
+	<%= will_paginate @highlights %></div>
+<% end %>

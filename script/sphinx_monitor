@@ -1,0 +1,47 @@
+#! /usr/bin/env ruby
+
+require 'net/smtp'
+require "open3"
+
+RAILS_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+Dir.chdir(RAILS_ROOT)
+
+@running = true
+@env = ARGV[0]
+if @env.nil?
+	@env = "development"
+end
+@restart = ARGV[1]
+if @restart.nil? || @restart != "yes"
+	@restart = "no"
+end
+
+Open3.popen3("cat log/#{@env}.sphinx.pid") do |stdin, stdout, stderr|
+	@pid = stdout.gets
+	unless @pid.nil?
+		@pid.strip!
+	end
+end
+sleep 2
+unless @pid.nil?
+	Open3.popen3("ps aux | grep #{@pid}") do |stdin, stdout, stderr|
+		stdout.each_line do |line|
+			line.include?("searchd") ? @status = line : nil
+		end
+		if @status.nil?
+			@status = "Searchd is not running in #{@env}"
+			@running = false
+		end
+	end
+else
+	@status = "No pid file found -- searchd is not running or the specified environment is incorrect"
+	@running = false
+end
+sleep 3
+if @restart == "yes" && @running == false
+	Open3.popen3("bundle exec rake RAILS_ENV=#{@env} ts:start") do |stdin, stdout, stderr|
+		@log_message = Time.now.to_s + ": " + @status + ", " + stdout.gets.strip
+		File.open(File.join(RAILS_ROOT,'log/searchd.log'),'a') {|f| f.write @log_message}
+	end
+end
+

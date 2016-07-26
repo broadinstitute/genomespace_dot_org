@@ -1,0 +1,3 @@
+<h1><%= @guide_section.title %></h1>
+<%= @guide_section.dev? ? "<p style='color: red;'>This section is a dev revision.</p>".html_safe : nil %>
+<%= @guide_section.content.html_safe %>

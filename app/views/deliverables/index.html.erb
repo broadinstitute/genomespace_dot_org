@@ -1,0 +1,60 @@
+<h1>GeneomeSpace Project Deliverables</h1>
+<table id="filter_search">
+	<tr><td>
+		Available Actions:
+	</td><td>
+	<%= render "/layouts/admin_search" %>
+	</td>
+</table>
+<table id="pages">
+	<thead>
+  <tr>
+    <th>Identifier</th>
+    <th>Description</th>
+    <th>Quarter</th>
+    <th>Completed?</th>
+    <th>Technical?</th>
+    <th>No. of Artifacts</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+	</thead>
+	<tbody>
+<% @deliverables.each do |deliverable| %>
+  <tr>
+    <td><%= deliverable.identifier %></td>
+    <td><%= deliverable.description %></td>
+    <td><%= deliverable.quarter.match(/\d+/)[0] %></td>
+    <td><%= deliverable.completed? ? "Yes" : "No" %></td>
+    <td><%= deliverable.tech? ? "Yes" : "No" %></td>
+    <td>
+    	<% unless @artifacts[deliverable.id].nil? %>
+    		<% artifacts = @artifacts[deliverable.id].contents.split('</a>').length - 1 %>
+    		<%= artifacts == -1 ? 0 : artifacts %>
+    	<% end %>
+    </td>
+    <td><%= link_to 'Show', deliverable %></td>
+    <td><%= link_to 'Edit', edit_deliverable_path(deliverable) %></td>
+    <td><%= link_to 'Destroy', deliverable, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+	</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[2, "desc"],[0, "asc"]]
+	        
+	    });
+	} );
+
+<% end %>
+
+<br />
+
+<%= button_to 'New Deliverable', new_deliverable_path, { :method => "get" } %>

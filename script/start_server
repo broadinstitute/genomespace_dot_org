@@ -1,0 +1,15 @@
+#! /bin/bash
+
+env=$1
+if [[ -z "$env" ]]
+then
+	env="development"
+fi
+
+cd /xchip/genepattern/gs_website
+
+bundle exec rake RAILS_ENV=$env ts:start
+wait
+env RAILS_ENV=$env script/delayed_job start $env
+wait
+rails s -e $env -d -p 3000

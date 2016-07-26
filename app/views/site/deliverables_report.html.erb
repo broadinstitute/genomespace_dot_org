@@ -1,0 +1,39 @@
+<h1>GenomeSpace Deliverables Report for <%= @quarter %></h1>
+<p>This report contains a list of all non-technical deliverables up for approval this quarter.  Items in red have not been approved yet.  You can review the artifacts for each deliverable by clicking the links in the list below.  Next, indicate your approval (yes/no), type your comments and click submit to send in your report.</p>
+<%= form_for :report do |f| %>
+	<% @open_deliverables = false %>
+	<% @deliverables.each do |d| %>
+	<div class="deliverable">
+		<%= d.completed? ? "<h3 class=\"completed\">".html_safe : "<h3 class=\"incomplete\">".html_safe %><strong><%= d.identifier.blank? ? "" : "#{d.identifier}: " %><%= d.description %></strong></h3>
+			<% unless @artifacts[d.id].nil? %>
+				<ul>
+				<% artifacts = @artifacts[d.id].contents.split("</p>") %>
+				<% artifacts.pop %>
+				<% artifacts.each do |a| %>
+					<li><%= unless a.nil? then a.html_safe end %></p></li>
+				<% end %>
+				</ul>
+				<% if current_user.deliverables_admin? && !d.completed? %>
+					<% div_id = "deliverable_#{d.id}" %>
+						<%= f.label "deliverable_#{d.id}_completed".to_sym, "Completed?" %>
+						<%= f.select "deliverable_#{d.id}_completed".to_sym, options_for_select([["Yes", 1],["No", 0]], d.completed? ? ["Yes", 1] : ["No", 0]) %>
+						<div class="inner">
+							<%= f.label "deliverable_#{d.id}_approval_comments".to_sym, "Comments" %><br />
+							<%= f.text_area("deliverable_#{d.id}_approval_comments".to_sym, :size => "65x4") %><br />
+						</div>
+						<%= f.hidden_field "deliverable_#{d.id}_approved_by".to_sym, :value => current_user.email %>
+						<% @open_deliverables = true %>
+					</div>
+				<% elsif d.completed? %>
+					<p>Approved on: <%= d.updated_at.blank? ? "N/A" : d.updated_at.to_s(:long) %><br />
+					Approved by: <%= d.approved_by.blank? ? "N/A" : d.approved_by.split("@").first %><br />
+					Approval Comments: <%= d.approval_comments.blank? ? "N/A" : d.approval_comments %></p>
+				<% end %>
+		  <% end %>
+	</div>
+	<hr />
+	<% end %>
+<%= f.hidden_field :deliverable_ids, :value => @deliverable_ids %>
+<%= @open_deliverables == true ? f.submit("Approve") : nil %>
+<% end %>	
+<p><%= link_to "Back", view_deliverables_path %></p>

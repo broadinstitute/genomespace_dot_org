@@ -1,0 +1,62 @@
+<%= form_for(@doc) do |f| %>
+  <% if @doc.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@doc.errors.count, "error") %> prohibited this doc from being saved:</h2>
+
+      <ul>
+      <% @doc.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+	<%= f.hidden_field :lock_version %>
+  <div class="field">
+    <%= f.label :component, "Component (please do not use the word GenomeSpace in title)" %><br />
+    <%= f.text_field :component %>
+  </div>
+  <div class="field">
+    <%= f.label :url, "URL (you can leave this blank to auto-generate a url based on the component, dev stage and version)" %><br />
+    <%= f.text_field :url %>
+  </div>
+  <div class="field">
+    <%= f.label :dev_stage, "Development Stage" %><br />
+    <%= f.select(:dev_stage, options_for_select(["alpha","beta","prod"], @doc.dev_stage)) %>
+  </div>
+  <div class="field">
+    <%= f.label :maj_version, "Major Version" %><br />
+    <%= f.number_field :maj_version %>
+  </div>
+  <div class="field">
+    <%= f.label :min_version, "Minor Version" %><br />
+    <%= f.number_field :min_version %>
+  </div>
+  <div class="field">
+    <%= f.label :deprecated, "Deprecated?" %><br />
+    <%= f.select :deprecated, options_for_select([["Yes", 1],["No", 0]], @doc.deprecated? ? ["Yes", 1] : ["No", 0]) %>
+  </div>
+  <div class="field">
+    <%= f.label :dev, "Version in Dev (setting this flag will only make this revision viewable to logged-in users.  All other users see the last live version)?" %><br />
+    <%= f.select :dev, options_for_select([["Yes", 1],["No", 0]], @doc.dev? ? ["Yes", 1] : ["No", 0]) %>
+  </div>
+  <div class="field">
+    <%= f.label :contents %><br />
+    <%= f.cktext_area :contents %>
+  </div>
+    <%= f.hidden_field :updated_by, :value => current_user.email %>
+    <%= f.hidden_field :created_by, :value => current_user.email %>
+  
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+<% end %>
+
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.doc_contents.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+
+<% end %>

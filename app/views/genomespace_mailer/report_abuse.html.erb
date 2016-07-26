@@ -1,0 +1,7 @@
+<p>The following comment has been flagged as inappropriate on the blog post titled "<em><%= @post.title %></em>" on the GenomeSpace website:</p>
+
+<p><strong>Author</strong>: <%= @comment.author %><br />
+<strong>Posted on</strong>: <%= @comment.created_at.to_s(:long) %><br />
+<strong>Comment</strong>: <%= @comment.content %></p>
+
+<p>If this comment is indeed inappropriate, please visit <%= link_to "http://#{@host}/posts/#{@post.id}/comments", "http://#{@host}/posts/#{@post.id}/comments" %> to remove the comment in question.</p>

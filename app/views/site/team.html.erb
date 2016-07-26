@@ -1,0 +1,10 @@
+<h1>GenomeSpace Team Content</h1>
+
+<p class="center"><%= link_to "View GenomeSpace Project Deliverables", view_deliverables_path, class: "edit_page_button", style: "font-size: 12px;text-decoration:none;" %></p>
+
+<% unless @team_pages.blank? %>
+	<% @team_pages.each do |team| %>
+		<p><strong><%= link_to team.title, genomespace_url(team) %></strong><br />
+		<%= team.desc %></p>
+	<% end %>
+<% end %>

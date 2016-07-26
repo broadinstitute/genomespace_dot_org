@@ -1,0 +1,26 @@
+<% unless @guide.get_num_sections == "0" %> 
+	<h3>View Live <%= link_to image_tag("view.gif"), support_guides_url(@guide) %></h3>
+<% end %>
+<p>
+  <b>Title:</b>
+  <%= @guide.title %>
+</p>
+
+<p>
+  <b>URL:</b>
+  <%= @guide.url %>
+</p>
+
+<p>
+  <b>Published?</b>
+  <%= @guide.published %>
+</p>
+
+<p>
+  <b>Desc:</b>
+  <%= @guide.desc %>
+</p>
+
+
+<%= link_to 'Edit', edit_guide_path(@guide) %> |
+<%= link_to 'Back', guides_path %>

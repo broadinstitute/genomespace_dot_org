@@ -1,0 +1,6 @@
+<h1>Editing "<em><%= @deliverable.identifier.blank? ? @deliverable.description : "#{@deliverable.identifier}: #{@deliverable.description}" %></em>"</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @deliverable %> |
+<%= link_to 'Back', deliverables_path %>

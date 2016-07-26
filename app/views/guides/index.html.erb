@@ -1,0 +1,53 @@
+<h1>GenomeSpace Usage Guides & Research Scenarios</h1>
+<table id="filter_search">
+	<tr><td>
+		Available Actions:
+	</td><td>
+	<%= render "/layouts/admin_search" %>
+	</td>
+</table>
+<table id="pages">
+<thead>
+  <tr>
+    <th>Title</th>
+    <th>URL</th>
+    <th>Description</th>
+    <th>Preview</th>
+    <th>Sections</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+</thead>
+<tbody>
+<% @guides.each do |guide| %>
+  <tr>
+    <td><%= guide.title %></td>
+    <td><%= guide.url %></td>
+    <td><%= guide.desc %></td>
+    <td><%= guide.get_num_sections == "0" ? "N/A" : link_to(image_tag("view.gif"), support_guides_url(guide)) %></td>
+    <td><%= link_to "#{guide.get_num_sections} (See All)", guide_guide_sections_path(guide) %></td>
+    <td><%= button_to 'New Section', new_guide_guide_section_path(guide), { :method => "get"}	%></td>
+    <td><%= link_to 'Edit', edit_guide_path(guide) %></td>
+    <td><%= link_to 'Destroy', guide, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[0, "desc"]]
+	        
+	    });
+	} );
+
+<% end %>
+
+<br />
+
+<%= button_to 'New Guide', new_guide_path, { :method => "get" } %>

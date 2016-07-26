@@ -1,0 +1,410 @@
+#! /usr/bin/env ruby
+
+# A cron job that processes the production.log for the week and formats an html email report of activity
+
+RAILS_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+Dir.chdir(RAILS_ROOT)
+
+require "rubygems"
+require "bundler/setup"
+require "net/smtp"
+require "open3"
+require "fileutils"
+require "resolv"
+require "googlecharts"
+
+# set up env variables
+@to_email = ["gs-dev@broadinstitute.org", "jmesirov@ucsd.edu"]
+# @to_email = "bistline@broadinstitute.org"
+@report_date = Time.now.strftime("%B %d, %Y")
+@pages = {}
+@guides = {}
+@tool_guides = {}
+@recipes = {}
+@docs = {}
+@blogs = {}
+@others = {}
+@errors = {}
+@codes = {}
+@domains = {}
+@unique_users = {}
+@total_volume = 0
+@archive = true
+@debug = false
+@filename = Time.now.strftime("%Y-%m-%d_gs_web_activity.html")
+@env = "production"
+@port = 3000
+
+# check to see if archiving is turned off, will not roll over logs if set to false
+ARGV.each do |arg|
+	arg == "--skip-archive" ? @archive = false : nil
+	if arg == "--debug"
+		@debug = true
+		@to_email = "nazaire@broadinstitute.org"
+		@filename = Time.now.strftime("%Y-%m-%d_gs_web_activity.html")
+	end
+	arg =~ /\-e\=/ ? @env = arg.gsub(/\-e\=/, "") : nil
+	arg =~ /\-p\=/ ? @port = arg.gsub(/\-p\=/, "") : nil
+end
+
+@logs = Dir.entries("log").select {|log| log.include?("#{@env}")}
+
+# roll over logs unless archiving is turned off
+unless @archive == false
+	if @logs.include?("#{@env}.4.log")
+		log = File.open("log/#{@env}.4.log")
+		File.delete(log)
+	end
+	if @logs.include?("#{@env}.3.log")
+		File.rename("log/#{@env}.3.log", "log/#{@env}.4.log")
+	end
+	if @logs.include?("#{@env}.2.log")
+		File.rename("log/#{@env}.2.log", "log/#{@env}.3.log")
+	end
+	if @logs.include?("#{@env}.1.log")
+		File.rename("log/#{@env}.1.log", "log/#{@env}.2.log")
+	end
+
+	# move production.log to backup, delete current production.log and create a fresh log for the week
+	FileUtils.cp("log/#{@env}.log", "log/#{@env}.1.log")
+	File.delete("log/#{@env}.log")
+	system "script/soft_reboot -e #{@env} -p #{@port}"
+end
+
+# begin parsing log
+@production_log = File.open("log/#{@env}.1.log")
+@production_log.each("Started") do |line|
+        sanitized_line = line.strip.encode("US-ASCII", {undef: :replace, invalid: :replace})
+
+	# reset all variables for this line
+	@request, @processed, @params, @code, @ip, @date = nil
+	# make sure request was processed by the SiteController, will ignore asset calls
+	if line.include?("SiteController")
+		begin
+			sanitized_line.match(/(GET|POST|HEAD|OPTIONS) \".*\"/) {|match| @request = match.to_s.gsub(/(GET|POST|HEAD|OPTIONS) /, "")}
+			sanitized_line.match(/SiteController#[\w]+/) {|match| @processed = match.to_s.gsub(/SiteController#/, "")}
+			sanitized_line.match(/Parameters: \{.*\}/) {|match| unless match.to_s.include?("ActionDispatch") then @params = eval(match.to_s.gsub(/Parameters: /, "")) end }
+			sanitized_line.match(/Completed [\d]+/) {|match| @code = match.to_s.gsub(/Completed /, "").to_i}
+			sanitized_line.match(/IP_ADDRESS [\d]+\.[\d]+\.[\d]+\.[\d]+/) {|match| @ip = match.to_s.gsub(/IP_ADDRESS /, "")}
+			sanitized_line.match(/[\d][\d][\d][\d]-[\d][\d]-[\d][\d] [\d][\d]:[\d][\d]:[\d][\d]/) {|match| @date = match.to_s}
+			# increment total volume and hits by user domain
+			@total_volume += 1
+		rescue ArgumentError => e
+			next
+		end
+
+		# ignore internal Google Appliance Search and Icinga
+		if @ip == "10.200.0.34" || @ip == "69.173.70.46"
+			next
+		end
+
+		begin
+			@unique_users[@ip].nil? ? @unique_users[@ip] = 1 : @unique_users[@ip] += 1
+			@hostname = Resolv.getname(@ip)
+			domain_parts = @hostname.split(".")
+			@debug ? (puts "ip: #{@ip}, domain_parts: #{domain_parts.to_s}") : nil
+			unless domain_parts.empty? || domain_parts.size == 1
+				unless domain_parts.last.downcase =~ /(com|net|edu|org|gov)/ && domain_parts.size > 2
+					@domain = domain_parts[domain_parts.size - 3] + "." + domain_parts[domain_parts.size - 2] + "." + domain_parts.last
+				else
+					@domain = domain_parts[domain_parts.size - 2] + "." + domain_parts.last
+				end
+			else
+				@domain = domain_parts.empty? ? "blank - no domain info" : domain_parts[0]
+			end
+			unless !@domain.match(/(crawl|bot|yandex|spider|scoutjet|amazonaws|baidu|wowrack)/).nil? # ignore crawlers and GSUI pings
+				@domains[@domain].nil? ? @domains[@domain] = 1 : @domains[@domain] += 1
+			end
+		rescue Resolv::ResolvError => e
+			key = @ip.to_s + " - " + @hostname
+			@domains[key].nil? ? @domains[key] = 1 : @domains[key] += 1
+		end
+
+		# begin breaking out controller calls to appropriate variables
+		case @processed
+			when "view_docs"
+				@debug ? (puts "Date: #{@date}, request: #{@request}, code: #{@code}") : nil
+				if @docs[@params["url"]].nil?
+					@docs[@params["url"]] = {"hits" => 1, "status" => {@code => 1}}
+				else
+					doc = @docs[@params["url"]]
+					doc["hits"] += 1
+					doc["status"][@code].nil? ? doc["status"][@code] = 1 : doc["status"][@code] += 1
+				end
+			when "view_guide"
+				@debug ? (puts "Date: #{@date}, request: #{@request}, code: #{@code}") : nil
+				if @guides[@params["url"]].nil?
+					@params["display_url"].nil? ? @params["display_url"] = "index page" : nil
+					@guides[@params["url"]] = {"hits" => 1, "sections" => {@params["display_url"] => {"hits" => 1, "status" => {@code => 1}}}}
+				else
+					guide = @guides[@params["url"]]
+					guide["hits"] += 1
+					@params["display_url"].nil? ? @params["display_url"] = "index page" : nil
+					if guide["sections"][@params["display_url"]].nil?
+						guide["sections"][@params["display_url"]] = {"hits" => 1, "status" => {@code => 1}}
+					else
+						if @params["display_url"].downcase.include?("gs-capabilities")
+							tool_name = @params["display_url"].downcase.gsub(/-gs-capabilities/, "")
+							@tool_guides[tool_name].nil? ? @tool_guides[tool_name] = 1 : @tool_guides[tool_name] += 1
+						elsif @params["url"] == "recipes" && @code <= 302
+							recipe = @params["display_url"].gsub(/-/, " ").capitalize
+							@recipes[recipe].nil? ? @recipes[recipe] = 1 : @recipes[recipe] += 1
+						end
+						guide_section = guide["sections"][@params["display_url"]]
+						guide_section["hits"] += 1
+						guide_section["status"][@code].nil? ? guide_section["status"][@code] = 1 : guide_section["status"][@code] += 1
+					end
+				end
+			when "view_blog"
+				@debug ? (puts "Date: #{@date}, request: #{@request}, code: #{@code}") : nil
+				@params.nil? ? @params = {} : @params
+				@params["url"].nil? ? @params["url"] = "index" : @params["url"]
+				if @blogs[@params["url"]].nil?
+					@blogs[@params["url"]] = {"hits" => 1, "status" => {@code => 1}}
+				else
+					blog = @blogs[@params["url"]]
+					blog["hits"] += 1
+					blog["status"][@code].nil? ? blog["status"][@code] = 1 : blog["status"][@code] += 1
+				end
+			when "rescue_from_nil_page"
+				@debug ? (puts "Date: #{@date}, request: #{@request}, code: #{@code}") : nil
+				if @errors[@request].nil?
+					@errors[@request] = {"hits" => 1, "status" => {@code => 1}}
+				else
+					page = @errors[@request]
+					page["hits"] += 1
+					page["status"][@code].nil? ? page["status"][@code] = 1 : page["status"][@code] += 1
+				end
+			else
+				@debug ? (puts "Date: #{@date}, request: #{@request}, code: #{@code}") : nil
+				@params.nil? ? @params = {} : nil
+				@params["url"].nil? ? @params["url"] = @request.gsub(/"/, "") : @params["url"]
+				unless @params["url"].match(/(favicon|system-status|robots|register)/) # ignore system status, favicon, robots and register calls
+					if @pages[@params["url"]].nil?
+						@pages[@params["url"]] = {"hits" => 1, "status" => {@code => 1}}
+					else
+						page = @pages[@params["url"]]
+						page["hits"] += 1
+						page["status"][@code].nil? ? page["status"][@code] = 1 : page["status"][@code] += 1
+					end
+				end
+		end
+	# catch any routing errors that don't make it to the SiteController
+	elsif line.include?("RoutingError")
+		@total_volume += 1
+
+		begin
+			@unique_users[@ip].nil? ? @unique_users[@ip] = 1 : @unique_users[@ip] += 1
+			@hostname = Resolv.getname(@ip)
+			domain_parts = @hostname.split(".")
+			@debug ? (puts "domain_parts: #{domain_parts.to_s}") : nil
+			unless domain_parts.empty? || domain_parts.size == 1
+				unless domain_parts.last.downcase =~ /(com|net|edu|org|gov)/ && domain_parts.size > 2
+					@domain = domain_parts[domain_parts.size - 3] + "." + domain_parts[domain_parts.size - 2] + "." + domain_parts.last
+				else
+					@domain = domain_parts[domain_parts.size - 2] + "." + domain_parts.last
+				end
+			else
+				@domain = domain_parts.empty? ? "blank - no domain info" : domain_parts[0]
+			end
+			unless @domain.match(/(crawl|bot|yandex|spider|scoutjet|amazonaws)/) # ignore crawlers and GSUI pings
+				@domains[@domain].nil? ? @domains[@domain] = 1 : @domains[@domain] += 1
+			end
+		rescue Resolv::ResolvError => e
+			key = @ip.to_s + " - no domain info"
+			@domains[key].nil? ? @domains[key] = 1 : @domains[key] += 1
+		end
+
+		line.match(/No route matches \[GET\] \".*\"/) {|match| @page = match.to_s.gsub(/No route matches \[GET\] /, "")}
+		if @errors[@page].nil?
+			@errors[@page] = {"hits" => 1, "status" => {404 => 1}}
+		else
+			page = @errors[@page]
+			page["hits"] += 1
+			page["status"][404].nil? ? page["status"][404] = 1 : page["status"][404] += 1
+		end
+	end
+end
+@production_log.close
+
+# begin formatting report
+
+@report = "<h2>Report date: #{@report_date}</h2>\n"
+@report << "<h3>Total Request Volume (not counting assets): #{@total_volume}</h3>\n"
+@report << "<h3>Unique Users: #{@unique_users.length}</h3>\n"
+
+@report << "<h3>Summary Report Stats</h3>\n"
+
+# pie chart for top level page hits
+@page_labels = []
+@page_data = []
+@top_pages = ["what-is-genomespace","/support/tools","documentation","for-developers","/support","about"]
+@pages.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	if @top_pages.include?(k)
+		@page_labels << "#{k} (#{v['hits']})"
+		@page_data << v["hits"]
+	end
+end
+@page_chart = Gchart.pie(:title => "Top Level Page Hit Distribution", :data => @page_data, :labels => @page_labels, :size => '900x250', :custom => "chp=4.71", :slice_colors => "551462" , :format => "image_tag")
+@report << @page_chart
+@report << "\n"
+
+# pie chart for recipe hits
+@recipe_labels = []
+@recipe_data = []
+@recipes.sort_by {|k,v| v}.reverse.each do |k,v|
+	unless k == "Index page"
+            recipe_lab = "(#{v}) #{k}"
+            unless recipe_lab.length < 30
+                recipe_lab = recipe_lab[0..30] + '...'
+            end
+            @recipe_labels << recipe_lab
+            @recipe_data << v
+	end
+end
+@recipe_chart = Gchart.pie(:title => "Recipe Hit Distribution", :data => @recipe_data, :labels => @recipe_labels, :size => '980x250', :custom => "chp=4.71", :slice_colors => "156436" , :format => "image_tag")
+@report << @recipe_chart
+@report << "\n"
+
+# pie chart for tool guide hits
+@tool_labels = []
+@tool_data = []
+@tool_guides.sort_by {|k,v| v}.reverse.each do |k,v|
+	@tool_labels << "#{k} (#{v})"
+	@tool_data << v
+end
+@tool_chart = Gchart.pie(:title => "Tool Guide Hit Distribution", :data => @tool_data, :labels => @tool_labels, :size => '900x250', :custom => "chp=4.71", :slice_colors => "616414" , :format => "image_tag")
+@report << @tool_chart
+@report << "\n"
+
+# pie chart for all guide hits
+@guide_labels = []
+@guide_data = []
+@guides.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	@guide_labels << "#{k} (#{v['hits']})"
+	@guide_data << v["hits"]
+end
+@guide_chart = Gchart.pie(:title => "Complete Guides Hit Distribution", :data => @guide_data, :labels => @guide_labels, :size => '900x250', :custom => "chp=4.71", :slice_colors => "634214" , :format => "image_tag")
+@report << @guide_chart
+@report << "\n"
+
+# pie chart for doc hits
+@doc_labels = []
+@doc_data = []
+@docs.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	@doc_labels << "#{k} (#{v['hits']})"
+	@doc_data << v["hits"]
+end
+@doc_chart = Gchart.pie(:title => "Architecture Documentation Hit Distribution", :data => @doc_data, :labels => @doc_labels, :size => '900x250', :custom => "chp=4.71", :slice_colors => "621414" , :format => "image_tag")
+@report << @doc_chart
+@report << "\n"
+
+# pie chart for domain distribution
+@domain_labels = []
+@domain_data = []
+i = 0
+@domains.sort_by {|k,v| v}.reverse.each do |k,v|
+	unless i > 10 || k.match(/(crawl|bot|yandex|spider|amazonaws)/)
+		@domain_labels << "#{k} (#{v})"
+		@domain_data << v
+		i += 1
+	end
+end
+@domain_chart = Gchart.pie(:title => "Top 10 Non-Crawler Domains Distribution", :data => @domain_data, :labels => @domain_labels, :size => '900x250', :custom => "chp=4.71", :slice_colors => "163764" , :format => "image_tag")
+@report << @domain_chart
+
+# detailed report
+@report << "<h2>Full Report Statistics</h2>\n"
+@report << "<h3>Top 20 Non-Crawler Domains</h3>\n"
+
+@report << "<small>All statistics below are sorted by count</small>\n"
+@report << "<table border='1' cellpadding='2' width='60%'><thead><tr><th style='background-color: #333; color: white' width='60%'>Domain</th><th style='background-color: #333; color: white'>Total Hits</th></tr></thead><tbody>\n"
+i = 1
+@domains.sort_by {|k,v| v}.reverse.each do |k,v|
+	unless i > 20
+		@report << "<tr><td>#{k}</td><td><center>#{v}</td></center></tr>\n"
+		i += 1
+	end
+end
+@report << "</tbody></table>\n"
+
+@report << "<h3>Tool Guide & Recipe Summary (full reports below)</h3>\n"
+@report << "<table border='1' cellpadding='2' width='60%'><tr><th style='background-color: #333; color: white' width='60%'>Tool Guides</th><th style='background-color: #333; color: white'>Total Hits</th></tr>\n"
+@tool_guides.sort_by {|k,v| v}.reverse.each do |k,v|
+	@report << "<tr><td>#{k}</td><td><center>#{v}</td></center></tr>\n"
+end
+@report << "</table>\n"
+@report << "<br />\n"
+@report << "<table border='1' cellpadding='2' width='60%'><tr><th style='background-color: #333; color: white' width='60%'>Recipe</th><th style='background-color: #333; color: white'>Total Hits</th></tr>\n"
+@recipes.sort_by {|k,v| v}.reverse.each do |k,v|
+	@report << "<tr><td>#{k}</td><td><center>#{v}</td></center></tr>\n"
+end
+@report << "</table>\n"
+
+@report << "<h3>Blog Post Breakdown</h3>\n"
+@report << "<table border='1' cellpadding='2' width='60%'><tr><th style='background-color: #333; color: white' width='60%'>Blog Post</th><th style='background-color: #333; color: white'>Total Hits</th><th style='background-color: #333; color: white'>200</th><th style='background-color: #333; color: white'>302</th><th style='background-color: #333; color: white'>404</th><th style='background-color: #333; color: white'>500</th></tr>\n"
+@report << "<tr><td style='background-color: yellow;'><strong>TOTAL VOLUME</strong></td><td style='background-color: yellow;'><strong><center>#{@blogs.values.each.inject(0) {|sum, value| sum + value["hits"]}}</center></strong></td><td colspan='4'><center>See Below</center></td>\n"
+@blogs.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	@report << "<tr><td><strong>#{k}</strong></td><td><center>#{v["hits"]}</td>"
+	@report << "<td><center>#{v['status'][200]}</center></td><td><center>#{v['status'][302]}</center></td><td><center>#{v['status'][404]}</center></td><td><center>#{v['status'][500]}</center></td></tr>\n"
+end
+@report << "</table>\n"
+
+@report << "<h3>Top 20 Page Hits</h3>\n"
+@report << "<table border='1' cellpadding='2' width='60%'><tr><th style='background-color: #333; color: white' width='60%'>Page URL</th><th style='background-color: #333; color: white'>Total Hits</th><th style='background-color: #333; color: white'>200</th><th style='background-color: #333; color: white'>302</th><th style='background-color: #333; color: white'>404</th><th style='background-color: #333; color: white'>500</th></tr>\n"
+i = 1
+@pages.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	unless i > 20
+		@report << "<tr><td><strong>#{k}</strong></td><td><center>#{v["hits"]}</td>"
+		@report << "<td><center>#{v['status'][200]}</center></td><td><center>#{v['status'][302]}</center></td><td><center>#{v['status'][404]}</center></td><td><center>#{v['status'][500]}</center></td></tr>\n"
+		i += 1
+	end
+end
+@report << "</table>\n"
+
+@report << "<h3>Architecture Documentation Hits</h3>\n"
+@report << "<table border='1' cellpadding='2' width='60%'><tr><th style='background-color: #333; color: white' width='60%'>Doc URL</th><th style='background-color: #333; color: white'>Total Hits</th><th style='background-color: #333; color: white'>200</th><th style='background-color: #333; color: white'>302</th><th style='background-color: #333; color: white'>404</th><th style='background-color: #333; color: white'>500</th></tr>\n"
+@docs.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	@report << "<tr><td><strong>#{k}</strong></td><td><center>#{v["hits"]}</td>"
+	@report << "<td><center>#{v['status'][200]}</center></td><td><center>#{v['status'][302]}</center></td><td><center>#{v['status'][404]}</center></td><td><center>#{v['status'][500]}</center></td></tr>\n"
+end
+@report << "</table>\n"
+
+@report << "<h3>Guide Hits</h3>\n"
+@report << "<table border='1' cellpadding='2' width='60%'><tr><th style='background-color: #333; color: white' width='60%'>Guide URL (&nbsp;-&nbsp;Guide Section)</th><th style='background-color: #333; color: white'>Total Hits</th><th style='background-color: #333; color: white'>200</th><th style='background-color: #333; color: white'>302</th><th style='background-color: #333; color: white'>404</th><th style='background-color: #333; color: white'>500</th></tr>\n"
+
+@guides.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	@report << "<tr><td><strong>#{k}</strong></td><td><center>#{v["hits"]}</td><td colspan='4'><center>See Below</center></td></tr>"
+	v["sections"].sort_by {|kk,vv| vv["hits"]}.reverse.each do |kk,vv|
+		@report << "<tr><td>&nbsp;-&nbsp;#{kk}</td><td><center>#{vv["hits"]}</td>"
+		@report << "<td><center>#{vv['status'][200]}</td><td><center>#{vv['status'][302]}</td><td><center>#{vv['status'][404]}</td><td><center>#{vv['status'][500]}</td></tr>\n"
+	end
+end
+@report << "</table>\n"
+
+@report << "<h3>Top 20 Errors Loading Content</h3>\n"
+@report << "<table border='1' cellpadding='2' width='60%'><tr><th style='background-color: #333; color: white' width='60%'>Request URL</th><th style='background-color: #333; color: white'>Total Hits</th><th style='background-color: #333; color: white'>200</th><th style='background-color: #333; color: white'>302</th><th style='background-color: #333; color: white'>404</th><th style='background-color: #333; color: white'>500</th></tr>\n"
+i = 1
+@errors.sort_by {|k,v| v["hits"]}.reverse.each do |k,v|
+	unless i > 20
+		@report << "<tr><td><strong>#{k}</strong></td><td><center>#{v["hits"]}</td>"
+		@report << "<td><center>#{v['status'][200]}</center></td><td><center>#{v['status'][302]}</center></td><td><center>#{v['status'][404]}</center></td><td><center>#{v['status'][500]}</center></td></tr>\n"
+		i += 1
+	end
+end
+@report << "</table>\n"
+
+# gotcha to fix any malformed image tags
+@report.gsub!(/\&amp \;/, "")
+
+# send email to gs-dev
+Net::SMTP.start('smtp.broadinstitute.org', 25) do |smtp|
+	smtp.open_message_stream("gs-info@broadinstitute.org", @to_email) do |contents|
+		contents.puts "From: gs-info@broadinstitute.org"
+		contents.puts "To: #{@to_email}"
+		contents.puts "Content-Type: text/html; charset=UTF-8"
+		contents.puts "Subject: www.genomespace.org Web Activity for week ending #{@report_date}"
+		contents.puts ""
+		contents.puts "#{@report}"
+	end
+end

@@ -1,0 +1,53 @@
+<h1>GenomeSpace Highlights</h1>
+<table id="filter_search">
+	<tr><td>
+		Available Actions:
+	</td><td>
+	<%= render "/layouts/admin_search" %>
+	</td>
+</table>
+<table id="pages">
+	<thead>
+  <tr>
+    <th>Title</th>
+    <th>Content</th>
+    <th>Url</th>
+    <th>Dev</th>
+    <th>Created by</th>
+    <th>Date Created</th>
+    <th></th>
+    <th></th>
+  </tr>
+  </thead>
+	<tbody>
+		<% @highlights.each do |highlight| %>
+		  <tr>
+		    <td><%= highlight.title %></td>
+		    <td><center><%= link_to image_tag("view.gif"), highlight_url(highlight) %></center></td>
+		    <td><%= highlight.url %></td>
+   			<td><%= highlight.dev? ? "Yes" : "No" %></td>
+		    <td><%= highlight.created_by %></td>
+		    <td><%= highlight.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+		    <td><%= link_to 'Edit', edit_highlight_path(highlight) %></td>
+		    <td><%= link_to 'Destroy', highlight, confirm: 'Are you sure?', method: :delete %></td>
+		  </tr>
+		<% end %>
+	</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[5, "desc"]]
+	        
+	    });
+	} );
+
+<% end %>
+
+<br />
+
+<%= button_to 'New Highlight', new_highlight_path, { :method => "get" } %>

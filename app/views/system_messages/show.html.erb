@@ -1,0 +1,25 @@
+<h3>View Live <%= link_to image_tag("view.gif"), sys_message_url(@system_message) %></h3>
+
+<p>
+  <b>Url:</b>
+  <%= @system_message.url %>
+</p>
+
+<p>
+  <b>Content:</b>
+  <%= @system_message.content.html_safe %>
+</p>
+
+<p>
+  <b>Priority:</b>
+  <%= @system_message.priority_format.html_safe %>
+</p>
+
+<p>
+  <b>Expires On:</b>
+  <%= @system_message.exp_display_date %>
+</p>
+
+
+<%= link_to 'Edit', edit_system_message_path(@system_message) %> |
+<%= link_to 'Back', system_messages_path %>

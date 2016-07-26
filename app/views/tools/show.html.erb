@@ -1,0 +1,24 @@
+<h3>View Live <%= link_to image_tag("view.gif"), gs_tool_url(@tool) %></h3>
+<p>
+  <b>Name:</b>
+  <%= @tool.name %>
+</p>
+<p>
+  <b>Lookup Name (this is auto-generated and used as part of the URL to retrieve this tool):</b>
+  <%= @tool.lookup_name %>
+</p>
+<p>
+  <b>Published:</b>
+  <%= @tool.published? ? image_tag("green_check_mark.gif") : image_tag("red_x.gif") %>
+</p>
+<p>
+	<strong>Description:</strong>
+	<%= @tool.desc.html_safe %>
+</p>
+<h3>Help Links</h3>
+<% @help_links.each do |help_link| %>
+	<p><%= link_to help_link.title, help_link.url %></p>
+<% end %>
+
+<%= link_to 'Edit', edit_tool_path(@tool) %> |
+<%= link_to 'Back', tools_path %>

@@ -1,0 +1,9 @@
+<h1>Request an Invitiation to join GenomeSpace</h1>
+
+<%= form_for :invite do |f| %>
+	<p><%= f.label :email, "Email: " %>
+	<%= f.text_field :email %></p>
+	<%= f.hidden_field :sent_invite, :value => false %>
+	<%= f.submit "Request Invitation" %>
+
+<% end %>

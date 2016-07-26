@@ -1,0 +1,78 @@
+<% unless @recipe_view == true %>
+	<td id="toc_wrapper">
+		<div id="toc">
+		<h3><%= @guide.title %></h3>
+			<ol>
+			<% @rendered = [] %>
+			<% @toc.each do |guide_section| %>
+				<% if @rendered.index(guide_section.id).nil? %>
+					<li id="guide_section_<%= guide_section.display_order %>" class="<%= guide_section.has_children? ? "has_children" : nil %>">
+					<% @rendered << guide_section.id %>
+					<% if guide_section.has_children? %>
+						<%= link_to_function image_tag("minus.png"), "collapseDiv('child_#{guide_section.id}')", class: "toggle_link" %>
+						<%= link_to guide_section.title, toc_url(@guide, guide_section) %>
+						 <ol id="child_<%= guide_section.id %>">
+							<% @children = user_signed_in? ? guide_section.get_children : guide_section.get_children("published") %>
+							<% @children.each do |child| %>
+								<% if @rendered.index(child.id).nil? %>
+									<li id="guide_section_<%= child.display_order %>" class="<%= child.has_children? ? "has_children" : nil %>">
+									<% @rendered << child.id %>
+									<% if child.has_children? %>
+										<%= link_to_function image_tag("minus.png"), "collapseDiv('subchild_#{child.id}')", class: "toggle_link" %>
+										<%= link_to child.title, toc_url(@guide, child) %>
+										<ol id="subchild_<%=child.id %>">
+										<% @sub_children = user_signed_in? ? child.get_children : child.get_children("published") %>
+										<% @sub_children.each do |sub| %>
+											<% if @rendered.index(sub.id).nil? %>
+												<%= "<li id=\"guide_section_#{sub.display_order}\">".html_safe %><%= link_to sub.title, toc_url(@guide, sub) %></li>
+												<% @rendered << sub.id %>
+											<% end %>
+										<% end %>
+										</ol>
+									<% else %>
+										<%= link_to child.title, toc_url(@guide, child) %>
+									<% end %>
+									</li>
+								<% end %>
+							<% end %>	
+						</ol>
+					<% else %>
+						<%= link_to guide_section.title, toc_url(@guide, guide_section) %>
+					<% end %>
+				</li>
+				<% end %>
+			<% end %>
+			</ol>
+		</div>
+		<p class="center"><%= link_to image_tag("print_icon.gif", :title => "Printer Friendly View"), print_guide_path(@guide.url) %></p>
+	</td>
+	
+	<%= javascript_tag do %>
+		$(document).ready(function() {
+			var guide_section = <%= "\"guide_section_#{@requested_section.display_order}\"".html_safe %>;
+			$("#" + guide_section + "> a").css("font-weight", "bold");
+			if ( '<%= @guide.title %>' == "Recipes" ) {
+				$.each($("#toc a.toggle_link"), function() {
+					$(this).click();
+					var image = $(this).children("img");
+					$(image).attr("src", $(image).attr("src") == "/assets/plus.png" ? "/assets/minus.png" : "/assets/plus.png");
+				});
+			}
+		});
+	<% end %>
+
+<% else %>
+	
+	<td id="toc_wrapper">
+		<div id="toc">
+		<h3><%= @recipe.title %></h3>
+			<% @toc.each do |step| %>
+				<% anchor = "#" + step.attributes['id'] %>
+				<% text = step.to_plain_text %>
+				<%= link_to text, anchor %><br />
+			<% end %>
+		</div>
+		<p><%= button_to "View All Recipes", support_guides_url(@guide), method: :get %></p>
+	</td>
+	
+<% end %>

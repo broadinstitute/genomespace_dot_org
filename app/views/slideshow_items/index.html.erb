@@ -1,0 +1,9 @@
+<h1>Listing Home Page Slideshow Items</h1>
+
+<div id="slideshow_items_target">
+	<%= render "slideshow_items_table" %>
+</div>
+<p>You can drag items to reorder them on the homepage.</p>
+<br />
+
+<%= button_to 'New Slideshow item', new_slideshow_item_path, { :method => "get" } %>

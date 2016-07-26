@@ -1,0 +1,27 @@
+#!/bin/bash
+# usage error message
+usage=$(
+cat <<EOF
+$0 [OPTION]
+-e VALUE    set the environment, defaults to 'production'
+
+EOF
+)
+
+# defaults
+env="production"
+
+while getopts "e:p:" OPTION; do
+case $OPTION in
+	e)
+		env="$OPTARG"
+		;;
+	*)
+    echo "unrecognized option"
+    echo "$usage"
+    ;;
+	esac
+done
+
+cd /xchip/genepattern/gs_website
+script/rails r -e $env "SystemMessage.refresh_latest_message"

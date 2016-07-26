@@ -1,0 +1,55 @@
+<h1>GenomeSpace Blog Posts</h1>
+<table id="filter_search">
+	<tr><td>
+		Available Actions:
+	</td><td>
+	<%= render "/layouts/admin_search" %>
+	</td>
+</table>
+<table id="pages">
+	<thead>
+	  <tr>
+	    <th>Title</th>
+	    <th>Url</th>
+	    <th>Author</th>
+	    <th>Published?</th>
+	    <th>Last Updated</th>
+	    <th>Date Created</th>
+    	<th>Preview</th>
+	    <th></th>
+	    <th></th>
+  	</tr>
+	</thead>
+	<tbody>
+	<% @posts.each do |post| %>
+	  <tr>
+	    <td><%= post.title %></td>
+	    <td><%= post.url %></td>
+	    <td><%= post.author %></td>
+    	<td><%= post.published? ? "Yes" : "No" %></td>
+	   	<td><%= post.updated_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+	    <td><%= post.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+  	    <td><center><%= link_to image_tag("view.gif"), post_url(post) %></center></td>
+	    <td><%= link_to 'Edit', edit_post_path(post) %></td>
+	    <td><%= link_to 'Destroy', post, confirm: 'Are you sure?', method: :delete %></td>
+	  </tr>
+	<% end %>
+	</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[4, "desc"]]
+	        
+	    });
+	} );
+
+<% end %>
+
+<br />
+
+<%= button_to 'New Post', new_post_path, { :method => "get" } %>

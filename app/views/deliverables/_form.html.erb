@@ -1,0 +1,56 @@
+<%= nested_form_for(@deliverable) do |f| %>
+  <% if @deliverable.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@deliverable.errors.count, "error") %> prohibited this deliverable from being saved:</h2>
+
+      <ul>
+      <% @deliverable.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+	<%= f.hidden_field :lock_version %>
+	<div class="field">
+		<%= f.label :identifier %><br />
+		<%= f.text_field :identifier %>
+	</div>
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description, :size => "150" %>
+  </div>
+  <div class="field">
+    <%= f.label :quarter %><br />
+    <%= f.select :quarter, options_for_select(["Q1","Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12","Q13","Q14","Q15","Q16"], @deliverable.id.nil? ? "Q1" : @deliverable.quarter) %>
+  </div>
+  <div class="field">
+    <%= f.label :completed, "Completed?" %><br />
+    <%= f.select :completed, options_for_select([["Yes", 1],["No", 0]], @deliverable.completed? ? ["Yes", 1] : ["No", 0]) %>
+  </div>
+  <div class="field">
+    <%= f.label :tech, "Technical Deliverable? (not to be approved by NHGRI)" %><br />
+    <%= f.select :tech, options_for_select([["Yes", 1],["No", 0]], @deliverable.tech? ? ["Yes", 1] : ["No", 0]) %>
+  </div>
+  <h2>Artifacts</h2>
+  <div class="field">
+		<%= f.fields_for :artifact do |a| %>
+			<%= a.label :contents, "Please enter each artifact on a new line.  Artifacts need to be entered as links to files or pages." %><br />
+			<%= a.cktext_area :contents %>
+		<% end %>
+
+  </div>
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+  
+<% end %>
+
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.deliverable_contents.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+
+<% end %>

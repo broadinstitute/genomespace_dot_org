@@ -1,0 +1,33 @@
+<h1>GenomeSpace Project Deliverables</h1>
+<p class="center"><%= link_to "View Team Content", team_path, class: "edit_page_button", style: "font-size: 12px;text-decoration:none;" %></p>
+<p><%= link_to_function "Show/Hide All", "showAll('deliverable');" %></p>
+<% (1..16).each do |i|  %>
+	<% quarter = "Q#{i}" %>
+	
+	<h2 class="inline"><%= quarter %> (ending <%= (Date.civil(2009,9,1) + (i * 3).months).to_s(:long) %>)</h2>&nbsp;<p class="inline"><%= link_to_function image_tag("open_close_on.png"), "collapseDiv('#{quarter}')" %></p>&nbsp;<p class="inline"><%= current_user.deliverables_admin? ? link_to("view report", view_deliverables_report_path(:quarter => quarter)) : nil %></p>
+	<% unless @deliverables[quarter].nil? %>	
+		<div class="deliverable" id="<%= quarter %>">
+			<% @deliverables[quarter].each do |d| %>
+				<h3 class="completed"><strong><%= d.identifier.blank? ? nil : "#{d.identifier}: " %><%= d.description %></strong></h3>
+				<% unless @artifacts[d.id].nil? %>
+					<ul>
+					<% artifacts = @artifacts[d.id].contents.split("</p>") %>
+					<% artifacts.pop %>
+					<% artifacts.each do |a| %>
+						<li><%= unless a.nil? then a.html_safe end %></p></li>
+					<% end %>
+					</ul>
+			  <% end %>
+			<% end %>
+		</div>
+	<% end %>
+	<hr />
+<% end %>
+
+<% unless @team_pages.blank? %>
+	<h1>GenomeSpace Team Content</h1>
+	<% @team_pages.each do |team| %>
+		<p><strong><%= link_to team.title, genomespace_url(team) %></strong><br />
+		<%= team.desc %></p>
+	<% end %>
+<% end %>

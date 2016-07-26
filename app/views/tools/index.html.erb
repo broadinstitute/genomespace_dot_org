@@ -1,0 +1,51 @@
+<h1>GenomeSpace Enabled Tools</h1>
+<table id="filter_search">
+	<tr><td>
+		Available Actions:
+	</td><td>
+	<%= render "/layouts/admin_search" %>
+	</td>
+</table>
+<table id="pages">
+	<thead>
+	  <tr>
+	    <th>Name</th>
+	    <th>Description</th>
+	    <th>Published?</th>
+	    <th>No. Help Links</th>
+	    <th>Preview</th>
+	    <th></th>
+	    <th></th>
+	  </tr>
+	</thead>
+	<tbody>
+	<% @tools.each do |tool| %>
+	  <tr>
+	  	<td><%= tool.name %></td>
+	  	<td><%= truncate(Hpricot(tool.desc).to_plain_text, :length => 175) %></td>
+	  	<td><center><%= tool.published? ? image_tag("green_check_mark.gif") : image_tag("red_x.gif") %></center></td>
+	  	<td><center><%= @help_links[tool.id].size %></center></td>
+	    <td><center><%= link_to image_tag("view.gif"), gs_tool_url(tool) %></center></td>
+	    <td><%= link_to 'Edit', edit_tool_path(tool) %></td>
+	    <td><%= link_to 'Destroy', tool, confirm: 'Are you sure?', method: :delete %></td>
+	  </tr>
+	<% end %>
+	</tbody>
+</table>
+
+<br />
+
+<%= button_to 'New Tool', new_tool_path, {:method => "get"} %>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[0, "asc"]]
+	        
+	    });
+	} );
+
+<% end %>

@@ -1,0 +1,70 @@
+<h1>GenomeSpace Web Pages</h1>
+<table id="filter_search">
+	<tr><td>
+		<%= form_tag pages_path, {:method => "get"} do %>
+			<%= label_tag :view, "Available Actions:" %>
+			<%= select_tag :view, options_for_select([["Your Last Edited Page", "last"],["Unpublished Pages", "unpublished"],["Dev Pages", "dev"]]), { :include_blank => true, :onchange => 'this.form.submit()'} %>
+			<% end %>
+	</td><td>
+	<%= render "/layouts/admin_search" %>
+	</td>
+</table>
+<table id="pages">
+	<thead>
+  <tr>
+  	<th>Revision</th>
+    <th>Title</th>
+    <th>Url</th>
+    <th>Category</th>
+    <th>Landing Page?</th>
+    <th>Description</th>
+    <th>Updated by</th>
+    <th>Preview</th>
+    <th>Home page</th>
+    <th>Published</th>
+    <th>Version in Dev?</th>
+    <th>Team Page</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+  </thead>
+	<tbody>
+<% @pages.each do |page| %>
+  <tr>
+  	<td><%= page.version %></td>
+    <td><%= page.title %></td>
+    <td><%= page.url %></td>
+    <td><%= page.category %></td>
+    <td><%= page.landing_page? ? "Yes" : "No" %></td>
+    <td><%= truncate(page.desc, :length => 75) %></td>
+    <td><%= page.versions.blank? ? page.created_by : page.versions.last.user_name %></td>
+    <td><center><%= link_to image_tag("view.gif"), genomespace_url(page) %></center></td>
+    <td><%= page.home_page? ? "Yes" : "No" %></td>
+    <td><%= page.published? ? "Yes" : "No" %></td>
+    <td><%= page.dev? ? "Yes" : "No" %></td>
+    <td><%= page.team_page? ? "Yes" : "No" %></td>
+    <td><%= page.version == 1 ? "N/A" : link_to('Revisions', show_revisions_path(page)) %></td>
+    <td><%= link_to 'Edit', edit_page_path(page) %></td>
+    <td><%= link_to 'Destroy', page, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+	</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[1, "asc"]]
+	        
+	    });
+	} );
+
+<% end %>
+
+<br />
+
+<%= button_to 'New Page', new_page_path, { :method => "get" } %>

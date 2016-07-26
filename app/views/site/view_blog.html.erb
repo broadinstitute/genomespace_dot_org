@@ -1,0 +1,20 @@
+<% if params[:url] %>
+	<h1><%= @post.title %>
+	<% if user_signed_in? %>
+		<%= current_user.cms_admin? ? edit_button(@post) : nil %>
+	<% end %>
+	</h1>
+	<%= !@post.published? ? "<p style='color: red;'>This post is a unpublished.</p>".html_safe : nil %>
+	<p class="byline">Posted by <%= @post.author %> on <%= @post.created_date_time %></p>
+	<p><%= @post.content.html_safe %></p>
+<% else %>
+	<% @posts.each do |post| %>
+		<h1><%= link_to post.title, view_blog_path(url: post.url) %></h1>
+		<p class="byline">Posted by <%= post.author %> on <%= post.created_date_time %></p>
+	    <%= post.created_date_only != post.updated_date_only ? "<br/><p class='byline'>Last updated on ".html_safe + post.updated_date_time + "</p>".html_safe : nil %>
+		<%= post.content.html_safe %>
+	<% end %>
+	
+	<div class="center"><%= page_entries_info @posts %><br />
+	<%= will_paginate @posts %></div>
+<% end %>

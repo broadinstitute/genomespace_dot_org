@@ -1,0 +1,51 @@
+<h1>GenomeSpace Registration Invites <span style="color: #212">[Pending: <span style="color:red;"><%= @unsent %></span>, Sent: <span style="color:green;"><%= @sent %></span>]</span></h1>
+<%= form_for :bulk_invites, {:url => bulk_invites_path} do %>
+	<table id="pages">
+	<thead>
+	  <tr>
+	  	<th></th>
+	    <th>Email</th>
+	    <th>Recieved On</th>
+	    <th>Sent Invite?</th>
+	    <th>Email Sent On</th>
+	    <th></th>
+	    <th></th>
+	    <th></th>
+	  </tr>
+	</thead>
+	<tbody>
+		<% @invites.each do |invite| %>
+		  <tr>
+		  	<td><%= check_box(:send_bulk, invite.id) %></td>
+		    <td><%= invite.email %></td>
+		    <td><%= invite.display_date %></td>
+		    <td><%= invite.sent_invite? ? "Yes" : "No" %></td>
+		    <td><%= invite.sent_invite? ? invite.email_display_date : "N/A" %></td>
+		    <td><%= link_to 'Send Email to User', send_registration_invite_path(invite), confirm: "Would you like to send a registration invitation to #{invite.email}?" %></td>
+		    <td><%= link_to 'Edit', edit_invite_path(invite) %></td>
+		    <td><%= link_to 'Destroy', invite, confirm: 'Are you sure?', method: :delete %></td>
+		  </tr>
+		<% end %>
+	</tbody>
+	</table>
+	<br />
+	<table border="0"><tr><td>
+	Bulk Emails: <%= button_to_function "Toggle All Visible", "toggleChecked()" %></td><td>
+	<%= submit_tag "Email All Checked", confirm: "Would you like to send registration invitations to all of the checked emails?" %></td></tr></table>
+<% end %>
+<%= button_to 'New Invitation', new_invite_path, { :method => "get" } %>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[3, "asc"],[2, "asc"]]
+	        
+	    });
+	} );
+	
+	var toggleChecked = function() { $('input[type="checkbox"]').click(); };
+
+<% end %>

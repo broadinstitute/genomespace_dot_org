@@ -1,0 +1,19 @@
+#! /bin/bash
+. /broad/software/scripts/useuse
+use .subversion-1.7.2
+
+# Cron job to add any new files in filesystem for GenomeSpace Rails site to svn.
+#
+# Author: Jon Bistline <bistline@broadinstitute.org>
+# Date: 1.24.2013
+
+# set up environment variables for date of svn commit
+svn_date=`date +%Y-%m-%d`
+
+cd /xchip/genepattern/gs_website
+# remove from svn any files that have been deleted
+svn st | grep ^! | awk '{ print $2 }' | xargs svn delete
+# add all new files to repository, will skip ignored directories.
+# if no changes script executes harmlessly
+svn st | grep ^? | awk '{ print $2 }' | xargs svn add
+svn commit -m "nightly cron to add files for $svn_date" --username gspace --password cdexswzaq

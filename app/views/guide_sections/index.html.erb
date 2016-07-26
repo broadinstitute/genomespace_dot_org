@@ -1,0 +1,9 @@
+<h1>Listing All Sections for "<em><%= @guide.title %></em>"</h1>
+
+<div id="guide_sections_target">
+	<%= render "guide_sections_table" %>
+</div>
+<p>Click and drag on any table row to reorder the sections.  To nest/denest a section, click the arrows next to the display order number for that section.  Moving a section with nested child sections will move the entire group en masse.</p>
+
+<%= button_to 'New Guide section', new_guide_guide_section_path, { :method => "get" } %>
+<p><%= link_to "Back", guides_path %></p>

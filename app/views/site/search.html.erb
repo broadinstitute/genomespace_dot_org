@@ -1,0 +1,49 @@
+<%= "<h1>Search Results for \"#{params[:search]}\"</h1>".html_safe %>
+<%= link_to "Search again on Google #{image_tag('google.png')}".html_safe, google_search_path(params[:search]), class: "google_link" %>
+<% unless @results.blank? %>
+	<% @results.each do |result| %>
+		<div class="result">
+		<% case result.class.name %>
+		<% when "Page" %>
+			<% unless result.team_page? ||  !result.published? || result.dev? %>
+				<h3><%= link_to result.excerpts.title.html_safe, result.url %><br />
+				<small>/<%= result.url %></small></h3>
+				<%= result.excerpts.plain_content.html_safe %>
+			<% end %>
+		<% when "Doc" %>
+			<h3><%= link_to "#{result.excerpts.component.html_safe} (version #{result.get_version})".html_safe, support_docs_url(result) %><br />
+			<small><%= support_docs_url(result) %></small></h3>
+			<%= result.excerpts.plain_content.html_safe %>
+		<% when "GuideSection" %>
+			<% unless !result.published? %>
+				<% guide = Guide.find(result.guide_id) %>
+				<h3><%= link_to "#{guide.title}: #{result.excerpts.title}".html_safe, toc_url(guide, result) %><br />
+				<small><%= toc_url(guide, result) %></small></h3>
+				<%= result.excerpts.plain_content.html_safe %>
+			<% end %>
+		<% when "Tool" %>
+			<h3><%= link_to "GenomeSpace Enabled Tool: #{result.excerpts.name}".html_safe, gs_tool_url(result) %><br />	
+			<small><%= gs_tool_url(result) %></small></h3>
+			<%= result.excerpts.plain_content.html_safe %>
+		<% when "Highlight" %>
+			<% unless result.dev? %>
+				<h3><%= link_to result.excerpts.title.html_safe, highlight_url(result) %><br />
+				<small>/<%= result.url %></small></h3>
+				<%= result.excerpts.plain_content.html_safe %>
+			<% end %>
+		<% when "Post" %>
+			<% unless !result.published? %>
+				<h3><%= link_to result.excerpts.title.html_safe, post_url(result) %><br />
+				<small>/<%= result.url %></small></h3>
+				<%= result.excerpts.plain_content.html_safe %>
+			<% end %>
+		<% end %>
+		</div>
+	<% end %>
+	
+	<div class="center">
+		<%= will_paginate @results %>
+	</div>
+<% else %>
+<p>No results were found.</p>
+<% end %>

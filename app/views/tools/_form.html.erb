@@ -1,0 +1,51 @@
+<%= nested_form_for(@tool) do |f| %>
+  <% if @tool.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@tool.errors.count, "error") %> prohibited this tool from being saved:</h2>
+
+      <ul>
+      <% @tool.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= f.hidden_field :lock_version %>
+	<div class="field">
+	  <%= f.label :name %><br />
+	  <%= f.text_field :name %>
+	</div>
+	<div class="field">
+	  <%= f.label :published, "Published? (unpublished tools are viewable only to logged-in users)" %><br />
+	  <%= f.select :published, options_for_select([["Yes", 1],["No", 0]], @tool.published? ? "1" : "0") %>
+	</div>
+	<div class="field">
+	  <%= f.label :desc, "Description of tool" %><br />
+	  <%= f.cktext_area :desc %>
+	</div>
+	<h3>Help Links</h3>
+	<%= f.fields_for :help_links do |help_link| %>
+		<div class="fields">
+			<span>
+			<%= help_link.label :title, "Title (text displayed on page)" %>
+			<%= help_link.text_field :title %>
+			<%= help_link.label :url, "URL (href portion of link)" %>
+			<%= help_link.text_field :url, :size => 60 %>
+			<%= help_link.link_to_remove image_tag("/assets/red_x.gif"), :confirm => "Are you sure you want to delete this link?  This action cannot be undone." %>
+			</span>
+		</div>
+	<% end %>
+	<p><%= f.link_to_add "Add a help link", :help_links %></p>
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+<% end %>
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.tool_desc.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+
+<% end %>

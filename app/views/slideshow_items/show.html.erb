@@ -1,0 +1,36 @@
+<h3>View Live <%= link_to image_tag("view.gif"), site_path %></h3>
+
+<p>
+	<strong>Display Order:</strong>
+	<%= @slideshow_item.display_order %>
+</p>
+
+<p>
+  <b>Title:</b>
+  <%= @slideshow_item.title %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @slideshow_item.description %>
+</p>
+
+<p>
+  <b>Links To:</b>
+  <%= @slideshow_item.url %>
+</p>
+
+<p>
+	<strong>Image:</strong>
+	<%= link_to image_tag("view.gif"), @slideshow_item.image.url, { :class => "fancybox" } %>
+</p>
+
+
+<%= link_to 'Edit', edit_slideshow_item_path(@slideshow_item) %> |
+<%= link_to 'Back', slideshow_items_path %>
+
+<%= javascript_tag do %>
+	$(document).ready(function() {
+	  $("a.fancybox").fancybox();
+	});
+<% end %>

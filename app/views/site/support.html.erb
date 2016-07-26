@@ -1,0 +1,23 @@
+<h1>Support</h1>
+<h2>GenomeSpace Email Forums</h2>
+<p>Ask questions, provide feedback, and request new features on the forums. Tool developer forum provides additional news about the early tool adopter program.</p>
+<p><%= link_to "Visit GenomeSpace User Forum", "https://groups.google.com/a/broadinstitute.org/forum/?hl=en#!forum/genomespace-users", class: "support_button" %></p>
+<p><%= link_to "Visit GenomeSpace Tool Developer Forum", "https://groups.google.com/a/broadinstitute.org/forum/?hl=en#!forum/gs-tool-developers", class: "support_button" %></p>
+<h2 class="clear_left">Sign Up</h2>
+<p>Enter your email address below and use the check boxes to select which lists you would like to join.  You will receive a confirmation email from each list with instructions on how to complete your regisitration.</p>
+<%= form_tag support_google_groups_path do %>
+	
+	<p><%= label_tag "Email: " %><%= text_field_tag :email, '', :size => 40 %>
+	<%= label_tag "GenomeSpace User", "GenomeSpace User" %><%= check_box_tag "genomespace-users" %>
+	<%= label_tag "GenomeSpace Tool Developer", "GenomeSpace Tool Developer" %><%= check_box_tag "gs-tool-developers" %>
+	<%= submit_tag "Submit" %>
+	</p>
+<% end %>
+<hr />
+<h2>Twitter</h2>
+<p><%= link_to "#{image_tag('/assets/Twitter_logo_blue.png')} Follow @GenomeSpace on Twitter".html_safe, "https://twitter.com/genomespace", class: "support_button" %></p>
+<h2 class="clear_left">Blog & News Highlights</h2>
+<p>The GenomeSpace team also frequently announces updates, new features, and events on our team blog and news highlights feeds.  Be sure to check both of them to stay up to date on the latest GenomeSpace developments.</p>
+<p><%= link_to "View Blog", view_blog_path, class: "support_button" %><%= link_to "View News Highlights", view_highlights_path, class: "support_button" %></p>
+<h2 class="clear_left"><a name="contact"></a>Reporting Bugs</h2>
+<p>The GenomeSpace team appreciates your feedback. GenomeSpace is still in development, and bug reports will help improve the quality and usability of the software.  Please report bugs to <%= mail_to "gs-help@broadinstitute.org", nil, :encode => "hex" %>.</p>

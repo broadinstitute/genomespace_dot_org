@@ -1,0 +1,57 @@
+<% unless @recipe_view == true %>
+	<h1><%= @requested_section.title %>
+		<% if user_signed_in? %>
+			<%= current_user.cms_admin? ? edit_button(@requested_section) : nil %>
+		<% end %>
+	</h1>
+	<%= @requested_section.dev? ? "<p style='color: red;'>This section is a dev revision.</p>".html_safe : nil %>
+	<%= !@requested_section.published? ? "<p style='color: red;'>This section is unpublished.</p>".html_safe : nil %>
+	<%= @requested_section.content.html_safe %>
+	</td>
+	<tr><td colspan="2">
+	<p class="center">
+	<% unless @guide_sections[@guide_sections.index(@requested_section) - 1].nil? %>
+		<%= link_to "<< #{@guide_sections[@guide_sections.index(@requested_section) - 1].title}", previous_guide_section_url(@guide, @guide_sections, @requested_section) %>
+	<% else %>
+		<< 
+	<% end %>
+	<% unless @requested_section.parent_id.nil? %>
+		| <%= link_to "Up", toc_url(@guide, GuideSection.find(@requested_section.parent_id)) %> |
+	<% else %>
+		| <%= link_to "Up", toc_url(@guide, GuideSection.find_by_guide_id_and_display_order(@guide.id, 1)) %> |
+	<% end %>
+	<% unless @guide_sections[@guide_sections.index(@requested_section) + 1].nil? %>
+		<%= link_to "#{@guide_sections[@guide_sections.index(@requested_section) + 1].title} >>", next_guide_section_url(@guide, @guide_sections, @requested_section) %>
+	<% else %>
+		>> 
+	<% end %>
+	</p>
+	</td></tr>
+	<%= javascript_tag do %>
+		if ( "<%= @guide.title %>" == "Recipes" && <%= !@recipe_view %> ) {
+			$.each($("#main_content a.toggle_link"), function() {
+				$(this).click();
+				var image = $(this).children("img");
+				$(image).attr("src", $(image).attr("src") == "/assets/plus.png" ? "/assets/minus.png" : "/assets/plus.png");
+			});
+		}
+		$('.collapsed').toggle();
+	<% end %>
+<% else %>
+	<h1><%= @recipe.title %>
+		<% if user_signed_in? %>
+			<%= current_user.cms_admin? ? edit_button(@recipe) : nil %>
+		<% end %>
+	</h1>
+	<!-- <%= button_to "View Recipe Instructions Only", toc_url(@guide, @recipe) + "/instructions", method: :get, :form => {:target => :_blank } %> -->
+	<%= @recipe.dev? ? "<p style='color: red;'>This section is a dev revision.</p>".html_safe : nil %>
+	<%= !@recipe.published? ? "<p style='color: red;'>This section is unpublished.</p>".html_safe : nil %>
+	<%= @recipe.content.html_safe %>
+	</td>
+	
+	<%= javascript_tag do %>
+	
+		$('.collapsed').toggle();
+		
+	<% end %>
+<% end %>

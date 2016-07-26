@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  component: MyString
+  maj_version: 1
+  min_version: 1
+  dev_stage: MyString
+  url: MyString
+  contents: MyText
+
+two:
+  component: MyString
+  maj_version: 1
+  min_version: 1
+  dev_stage: MyString
+  url: MyString
+  contents: MyText

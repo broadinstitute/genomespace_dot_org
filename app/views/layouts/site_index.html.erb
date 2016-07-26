@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>GenomeSpace: Home</title>
+  <%= stylesheet_link_tag    "site", "jquery-ui-1.8.19.custom.css" %>
+  <%= javascript_include_tag "application" %>
+	<%= favicon_link_tag asset_path("favicon.ico") %>
+  <%= csrf_meta_tags %>
+  
+</head>
+<body>
+	<%= render "/layouts/email_links" %>
+<div id="page_wrapper">
+	<div id="page_content">
+	<div id="logo"><%= link_to image_tag("gslogo.png"), site_path %></div>
+
+	<%= render "/layouts/nav" %>
+	<div id="billboard">
+		<div id="invitation">
+			<div class="invitation-text">
+				<%= image_tag "GS-home-logo.png" %>
+				<p id="tagline">Frictionless connection of bioinformatics tools</p>
+			</div>
+			<div class="invitation-btn">
+				<%= link_to "Register", register_account_path %>
+			</div>
+			<div class="use-btn">
+				<%= link_to "User Login", "https://gsui.genomespace.org/jsui/gsui.html" %>
+			</div>
+		</div>
+	</div>
+<table class="front_content_bottom"><tr><td>
+		<%= yield %>		
+</table>	
+		</div>
+		</div>
+		<div id="footer">
+		<%= javascript_tag do %>
+			$(document).ready(function() {
+					$( "#news" ).tabs();
+					$( "#highlights_blog" ).tabs({selected: <%= get_newest_content(@available_videos) %>});
+			});
+		<% end %>
+		
+		<%= javascript_tag do %>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		
+		  ga('create', 'UA-54489169-1', 'auto');
+		  ga('send', 'pageview');
+		
+		<% end %>
+		</div>
+	</body>
+</html>
+

@@ -1,0 +1,117 @@
+<div id="login_menu"><%= link_to "User Login", "https://gsui.genomespace.org/jsui/gsui.html" %>
+	<% if user_signed_in? %>
+		| <%= link_to "Admin Logout: #{current_user.username}", destroy_user_session_path, {:method => "delete" } %>
+	<% end %>
+</div>
+<ul id="nav">
+	<li id="what-is-genomespace"><%= link_to "What is GenomeSpace?", landing_page("what-is-genomespace") %>
+		<% unless menu_pages("what-is-genomespace").empty? %>
+			<ul>
+				<% menu_pages("what-is-genomespace").each do |page| %>
+					<li><%= link_to page.title, genomespace_url(page) %>
+						<p><%= page.desc %></p>
+					</li>
+				<% end %>
+			</ul>
+		<% end %>
+	</li>
+	<li id="tools"><%= link_to "Tools", view_tools_path %>
+		<% unless menu_pages("tools").empty? %>
+			<ul>
+				<% menu_pages("tools").each do |page| %>
+					<li><%= link_to page.title, genomespace_url(page) %>
+						<p><%= page.desc %></p>
+					</li>
+				<% end %>
+			</ul>
+		<% end %>
+	</li>
+	<li id="recipes"><%= link_to "Recipes", "http://recipes.genomespace.org" %></li>
+	<% if user_signed_in? %>
+	    <li id="gsrecipes"><%= link_to "Recipes (New)", "http://gsweb02.broadinstitute.org:3000" %></li>
+    <% end %>
+	<li id="documentation"><%= link_to "Documentation", landing_page("documentation") %>
+		<ul>
+			<% menu_pages("documentation").each do |item| %>
+				<li><%= link_to item.title, item.class.name == "Page" ? genomespace_url(item) : support_guides_url(item) %>
+					<p><%= item.desc %></p>
+				</li>
+			<% end %>
+		</ul>
+	</li>
+	<li id="developers"><%= link_to "Developers", landing_page("developers") %>
+		<% unless menu_pages("developers").empty? %>
+			<ul>
+				<% menu_pages("developers").each do |page| %>
+					<li><%= link_to page.title, genomespace_url(page) %>
+						<p><%= page.desc %></p>
+					</li>
+				<% end %>
+			</ul>
+		<% end %>
+	</li>
+	<li id="support"><%= link_to "Support", support_path %>
+			<% unless menu_pages("support").empty? %>
+				<ul>
+				<% menu_pages("support").each do |page| %>
+					<li><%= link_to page.title, genomespace_url(page) %>
+						<p><%= page.desc %></p>
+					</li>
+				<% end %>
+				</ul>
+			<% end %>
+		
+	</li>
+	<li id="about"><%= link_to "About", landing_page("about") %>
+		<% unless menu_pages("about").empty? %>
+			<ul>
+				<% menu_pages("about").each do |page| %>
+					<li><%= link_to page.title, genomespace_url(page) %>
+						<p><%= page.desc %></p>
+					</li>
+				<% end %>
+			</ul>
+		<% end %>
+	</li>
+	<li class="search">
+		<div id="search_box">
+			<%= form_tag search_path, {:method => "get"} do %>
+				<%= text_field_tag :search, params[:search], :class => "search" %>
+				<%= submit_tag nil, {:class => "searchBtn", :name => nil}%>
+			<% end %>
+		</div>
+	</li>
+</ul>
+
+<%= javascript_tag do %>
+		// grab page category and use to highlight correct menu item.  if none present, parse url to find where the user is.
+		var category = <%= @page ? "\"#{@page.category}\"".html_safe : "\"\"".html_safe %>;
+		if ( !category ){
+			url_parts = $(location).attr('pathname').split("/");
+			url_string = url_parts[1] + "/" + url_parts[2]
+			if (url_string == "support/tools"){
+				category = "tools"
+			}
+			else if (url_string == "support/guides"){
+				url_parts[3] == "recipes" ? category = "recipes" : category = "documentation"
+			}
+			else if (url_parts[1] == "genomespace-recipes")
+			{
+                category = "gsrecipes"
+            }
+			else if (url_string == "support/api"){
+				category = "developers"
+			}
+			else if ((url_string == "register/undefined") || (url_string == "request_invite/undefined")) {
+				category = "what-is-genomespace"
+			}
+			else if (url_string == "/undefined") {
+				category = ""
+			}
+			else if (url_string == "support/undefined") {
+				category = "support"
+			}
+		}
+		$("#" + category).addClass("current");
+
+<% end %>

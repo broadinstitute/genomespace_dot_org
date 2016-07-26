@@ -1,0 +1,45 @@
+<h1>GenomeSpace System Messages</h1>
+
+<table id="pages">
+	<thead>
+	  <tr>
+	  <th>URL</th>
+    <th>Posted On</th>
+    <th>Priority</th>
+    <th>Expires On</th>
+    <th>Preview</th>
+    <th></th>
+    <th></th>
+  </tr>
+	</thead>
+	<tbody>
+		<% @system_messages.each do |system_message| %>
+		  <tr>
+		  	<td><%= system_message.url %></td>
+		    <td><%= system_message.display_date %></td>
+		    <td><%= system_message.priority_format.html_safe %></td>
+		    <td><%= system_message.exp_display_date %></td>
+		    <td><center><%= link_to image_tag("view.gif"), sys_message_url(system_message) %></center></td>
+		    <td><%= link_to 'Edit', edit_system_message_path(system_message) %></td>
+		    <td><%= link_to 'Destroy', system_message, confirm: 'Are you sure?', method: :delete %></td>
+		  </tr>
+		<% end %>
+	</tbody>
+</table>
+
+<br />
+
+<%= button_to 'New System message', new_system_message_path, {:method => "get"} %>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[0, "desc"]]
+	        
+	    });
+	} );
+
+<% end %>

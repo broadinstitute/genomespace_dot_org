@@ -1,0 +1,46 @@
+<h1>GenomeSpace Tools and Data Sources</h1>
+<% unless params[:lookup_name].nil? %>
+	<h2><%= @tool.name %>
+		<% if user_signed_in? %>
+			<%= current_user.cms_admin? ? edit_button(@tool) : nil %>
+		<% end %>
+	</h2>
+	<%= !@tool.published? ? "<p style='color: red;'>This tool is unpublished.</p>".html_safe : nil %>
+	<% @website_link = gs_tool_website_link(@tool) %>
+	<% unless @website_link.nil? %>
+		<p>Project Website: <%= link_to(@website_link.url, @website_link.url) %></p>
+	<% end %> 
+	<%= @tool.desc.html_safe %>
+	<h3>Help Links</h3>
+	<% @help_links.each do |help_link| %>
+		<p><%= link_to help_link.title, help_link.url %></p>
+	<% end %>
+	<% unless @recipes.blank? %>
+		<h3>Recipes</h3>
+		<% @recipes.each do |recipe| %>
+			<p><%= link_to recipe.title, toc_url(@guide, recipe) %></p>
+		<% end %>
+	<% end %>
+	<hr />
+	<p><%= link_to "Back", view_tools_path %></p>
+<% else %>
+	<% @bg = "tool_odd" %>
+	<p>GenomeSpace hosts a variety of tools and data sources that provide a wide spectrum of genomic analysis and bioinformatics capabilities. If you would like to add your tool to the GenomeSpace community, see our <%= link_to "developer information", "/for-developers" %> or <%= link_to "contact us", "/support#contact" %>.</p>
+	<table id="tools_table">
+		<thead>
+		  <tr>
+		    <th>Tool</th>
+		    <th>Description</th>
+		  </tr>
+		</thead>
+		<tbody>
+		<% @tools.each do |tool| %>
+		  <tr class='<%= "#{@bg}" %>'>
+		  	<td><h3><%= link_to tool.name, gs_tool_url(tool), title: "GenomeSpace help page for #{tool.name}" %></h3></td>
+		  	<td><%= Hpricot(tool.desc).at("p").inner_html.html_safe %></td>
+		  </tr>
+		  <% @bg == "tool_odd" ? @bg = "tool_even" : @bg = "tool_odd" %>
+		<% end %>
+		</tbody>
+	</table>
+<% end %>

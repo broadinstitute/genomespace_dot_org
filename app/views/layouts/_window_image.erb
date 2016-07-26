@@ -1,0 +1,7 @@
+<div id="window_image"><%= image_tag(@selected_item.image.url) %></div>
+  <div id="window_text">
+    <h1 id="window_head"><%= @selected_item.title %></h1>
+    <h6 id="window_body"><%= @selected_item.description %></h6>
+    <h4 id="read_more"><%= link_to "Read more &gt;&gt;".html_safe, "/" + @selected_item.url %></h4>
+  </div>
+</div>

@@ -1,0 +1,5 @@
+<hr />
+<h1><%= @doc.component.html_safe %> (version <%= @doc.get_version %>)</h1>
+<%= @doc.deprecated? ? "<h2 style='color: red;'>THIS API HAS BEEN DEPRECATED</h2>".html_safe : nil %>
+<%= @doc.dev? ? "<p style='color: red;'>This doc is a dev revision.</p>".html_safe : nil %>
+<%= @doc.contents.html_safe %>

@@ -1,0 +1,2 @@
+module ServerPropertiesHelper
+end

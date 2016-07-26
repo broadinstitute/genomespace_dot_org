@@ -1,0 +1,22 @@
+<p>
+  <strong>(Identifier) Description:</strong>
+  (<%= @deliverable.identifier %>) <%= @deliverable.description %>
+</p>
+<p>
+  <strong>Quarter:</strong>
+  <%= @deliverable.quarter %>
+</p>
+<p>
+  <strong>Completed:</strong>
+  <%= @deliverable.completed? ? "Yes" : "No" %>
+</p>
+<p>
+  <strong>Technical Deliverable:</strong>
+  <%= @deliverable.tech? ? "Yes" : "No" %>
+</p>
+<% unless @artifact.nil? %>
+	<h3>Artifacts:</h3>
+	<%= @artifact.contents.html_safe %>
+<% end %>
+<%= link_to 'Edit', edit_deliverable_path(@deliverable) %> |
+<%= link_to 'Back', deliverables_path %>

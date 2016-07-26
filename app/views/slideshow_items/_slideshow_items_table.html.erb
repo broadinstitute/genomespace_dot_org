@@ -1,0 +1,55 @@
+<table id="pages">
+	<thead>
+  <tr>
+  	<th>Display Order</th>
+    <th>Title</th>
+    <th>Description</th>
+    <th>Links to</th>
+    <th>Image</th>
+    <th></th>
+    <th></th>
+  </tr>
+	</thead>
+	<tbody class="sortable">
+		<% @slideshow_items.each do |slideshow_item| %>
+		  <%= "<tr id=\"slideshow_item_#{slideshow_item.id}\">".html_safe %>
+		  	<td><center><%= slideshow_item.display_order %></center></td>
+		    <td><%= slideshow_item.title %></td>
+		    <td><%= truncate(slideshow_item.description, :length => 150) %></td>
+		    <td><%= slideshow_item.url %></td>
+		    <td><center><%= link_to image_tag("view.gif"), slideshow_item.image.url, { :class => "fancybox" } %></center></td>
+		    <td><%= link_to 'Edit', edit_slideshow_item_path(slideshow_item) %></td>
+		    <td><%= link_to 'Destroy', slideshow_item, confirm: 'Are you sure?', method: :delete %></td>
+		  </tr>
+		<% end %>
+	</tbody>
+</table>
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "bSort": false,
+	        "iDisplayLength": 100,
+	        "bFilter": false,
+	        "bLengthChange": false
+	    });
+	} );
+	
+	$(document).ready(function() {
+	  $("a.fancybox").fancybox();
+	});
+	
+	$(function() { 
+	  $("#pages tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "slideshow_items/reorder_slideshow_items",
+	  			data: $("#pages tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+
+<% end %>

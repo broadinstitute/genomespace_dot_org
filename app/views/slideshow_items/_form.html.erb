@@ -1,0 +1,45 @@
+<%= form_for(@slideshow_item) do |f| %>
+  <% if @slideshow_item.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@slideshow_item.errors.count, "error") %> prohibited this slideshow_item from being saved:</h2>
+
+      <ul>
+      <% @slideshow_item.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :title %><br />
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+  	<div class="inner">
+	    <%= f.label :description %><br />
+	    <%= f.text_area :description, :size => "60x5" %>
+  	</div>
+  </div>
+  <div class="field">
+    <%= f.label :url, "Page to link to" %><br />
+    <%= f.select :url, options_from_collection_for_select(all_pages, :url, :select_title, @slideshow_item.new_record? ? all_pages.first : @slideshow_item.url) %>
+  </div>
+  <div class="field">
+  	<%= f.label :image, "Image file (Please size to 380x400px w/ white background. A thumbnail will be auto-generated at 126x95px, center cropped, maintaining aspect ratio)" %><br >
+  	<%= f.file_field :image %>
+  	<% unless @slideshow_item.new_record? %>
+  		<span>Current file: <%= @slideshow_item.image_file_name %><%= link_to image_tag("view.gif"), @slideshow_item.image.url, { :class => "fancybox" } %></span>
+  	<% end %>
+  </div>
+  <%= f.hidden_field :display_order, :value => @slideshow_item.new_record? ? SlideshowItem.get_next_display_order : @slideshow_item.display_order %>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<%= javascript_tag do %>
+	$(document).ready(function() {
+	  $("a.fancybox").fancybox();
+	});
+<% end %>

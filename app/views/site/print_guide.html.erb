@@ -1,0 +1,6 @@
+<h1><%= @guide.title %></h1>
+<% @guide_sections.each do |guide_section| %>
+	<h2><%= guide_section.title %></h2>
+	<%= guide_section.content.html_safe %>
+	<hr />
+<% end %>

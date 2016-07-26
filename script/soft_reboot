@@ -1,0 +1,40 @@
+#!/bin/bash
+
+. /broad/software/scripts/useuse
+reuse .ruby-2.0.0-p451
+reuse ImageMagick
+reuse Sphinx
+reuse .gcc-4.5.3
+
+# usage error message
+usage=$(
+cat <<EOF
+$0 [OPTION]
+-e VALUE    set the environment, defaults to 'development'
+-p VALUE    set the port, defaults to 3000
+
+EOF
+)
+
+# defaults
+ENV="development"
+PORT=3000
+
+while getopts "e:p:" OPTION; do
+case $OPTION in
+	e)
+		ENV="$OPTARG"
+		;;
+	p)
+		PORT="$OPTARG"
+		;;
+	*)
+    echo "unrecognized option"
+    echo "$usage"
+    ;;
+	esac
+done
+
+# stop and restart server in specified env and port
+cat tmp/pids/server.pid | xargs kill -9
+script/rails s -e $ENV -d -p $PORT

@@ -1,0 +1,12 @@
+<% @announcements.each do |announcement| %>
+
+	<h1><%= announcement.title %></h1>
+	<p class="byline">Posted by: <strong><%= announcement.updated_by %></strong> on <strong><%= announcement.updated_at.strftime("%B %d, %Y at %I:%M%p") %></strong></p>
+	<%= announcement.content.html_safe %>
+	<hr />
+<% end %>
+
+<div class="flickr_pagination">
+	<p><%= (page_entries_info @announcements).html_safe %></p>
+	<%= will_paginate @announcements %>
+</div>

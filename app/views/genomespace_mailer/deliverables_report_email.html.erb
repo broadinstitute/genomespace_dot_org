@@ -1,0 +1,9 @@
+<h1>GenomeSpace Deliverables Report for <%= @quarter %></h1>
+<p>The non-technical deliverables for <%= @quarter %> have been reviewed and approved by <%= @approver %>.  See below for details or visit the <%= link_to "current quarter's report", "http://#{@host}/team/deliverables_report/#{@quarter}" %>.</p>
+
+<% @deliverables.each do |d| %>
+	<h3><%= d.description %></h3>
+	<p>Completed? <strong><%= d.completed? ? "Yes" : "No" %></strong></p>
+	<p>Comments: <%= d.approval_comments %></p>
+	<hr />
+<% end %>

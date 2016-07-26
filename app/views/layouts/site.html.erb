@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>GenomeSpace: 
+  	<% case controller.action_name %>
+  	<% when "view" %>
+	  	<%= @page.title %>
+	  <% when /deliverables/ %>
+	  	Deliverables
+	  <% when "view_guide" %>
+	  	<%= @guide.title %>
+	  <% when "view_docs" %>
+	  	<%= @doc.component %> (version <%= @doc.get_version %>)
+	  <% when "process_registration" %>
+	  	Thank You For Registering!
+	  <% when "view_highlights" %>
+	  	News
+	  <% when "view_blog" %>
+	  	Blog
+	  <% when /view_system_message/ %>
+	  	System Status
+	  <% when /invite/ %>
+	  	Request an Invitation
+	  <% else %>
+	  	<%= controller.action_name.capitalize %>
+	  <% end %>
+  </title>
+  <%= stylesheet_link_tag    "site" %>
+  <%= stylesheet_link_tag    "demo_table_jui" %>
+  <%= stylesheet_link_tag    "jquery-ui-1.8.4.custom.css" %>
+  <%= javascript_include_tag "application" %>
+	<%= favicon_link_tag asset_path("favicon.ico") %>
+  <%= csrf_meta_tags %>
+  
+  <% if controller.action_name == "diff_content" %>
+  	<style>
+  		p, h1, h2, h3, h4, li, table, tr, th, td, span, pre, code {
+  			background-color: inherit;
+  		}
+  	</style>
+  <% end %>
+</head>
+<body>
+
+<div id="page_wrapper">
+	<div id="page_content">
+	<div id="logo"><%= link_to image_tag("gslogo.png"), site_path %></div>
+	
+		<%= render "/layouts/nav" %>
+		
+		<div id="content_panel">
+			<table width="100%"><tr>
+			<% unless @toc.nil? %>
+				<%= render "/layouts/toc" %>
+			<% end %>
+				<td id="main_content">
+					<div id="notice"><%= notice %></div>
+					<div id="alert"><%= alert %></div>
+						
+						<%= yield %>
+					<% unless controller.action_name == "view_guide" %>
+						</td>	
+					<% end %>
+			
+		</tr></table>
+		
+	</div>
+</div>
+<div id="footer">
+</div>
+<%= javascript_tag do %>
+	$(document).ready(function() {
+		$("a.toggle_link").click(function() {
+			var image = $(this).children("img");
+			$(image).attr("src", $(image).attr("src") == "/assets/plus.png" ? "/assets/minus.png" : "/assets/plus.png");
+		});
+	});
+<% end %>
+
+<%= javascript_tag do %>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-54489169-1', 'auto');
+  ga('send', 'pageview');
+
+<% end %>
+</body>
+</html>
+

@@ -1,0 +1,10 @@
+<p>The system status message on www.genomespace.org has not been updated since <strong><%= @system_message.display_date %></strong>.  The current message is this:</p>
+
+<hr />
+<p>Priority: <%= @system_message.priority_format.html_safe %></p>
+<%= @system_message.content.html_safe %>
+<hr />
+<p>Please go <%= link_to "here", "http://www.genomespace.org/system_messages" %> to update the latest message or add a new status message.</p>
+
+<p>Best,<br />
+The GenomeSpace Daemon</p>

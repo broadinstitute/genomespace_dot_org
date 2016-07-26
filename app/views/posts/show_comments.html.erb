@@ -1,0 +1,39 @@
+<h1>Comments for "<em><%= @post.title %></em>"</h1>
+
+<table id="pages">
+	<thead>
+	  <tr>
+	    <th>Author</th>
+	    <th>Content</th>
+	    <th>Date Posted</th>
+    	<th>View Post</th>
+	    <th>Destroy</th>
+  	</tr>
+	</thead>
+	<tbody>
+	<% @comments.each do |comment| %>
+	  <tr>
+	    <td><%= comment.author %></td>
+    	<td><%= truncate(comment.content, length: 150) %></td>
+	   	<td><%= comment.created_at.strftime('%Y-%m-%d %H:%M:%S') %></td>
+  	  <td><center><%= link_to image_tag("view.gif"), post_url(@post) %></center></td>
+	    <td><center><%= link_to image_tag("red_x.gif"), "/posts/#{@post.id}/comments/#{comment.id}", confirm: 'Are you sure?', method: :delete %><center></td>
+	  </tr>
+	<% end %>
+	</tbody>
+</table>
+<p><%= link_to "Back to all Posts", posts_path %></p>
+
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[2, "desc"]]
+	        
+	    });
+	} );
+
+<% end %>

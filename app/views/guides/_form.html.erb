@@ -1,0 +1,45 @@
+<%= form_for(@guide) do |f| %>
+  <% if @guide.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@guide.errors.count, "error") %> prohibited this guide from being saved:</h2>
+
+      <ul>
+      <% @guide.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+	<%= f.hidden_field :lock_version %>
+	<%= f.hidden_field :category, :value => "documentation" %>
+  <div class="field">
+    <%= f.label :title %><br />
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+    <%= f.label :url, "URL (you can leave this blank to auto-generate a url based on the guide title)" %><br />
+    <%= f.text_field :url %>
+  </div>
+  <div class="field">
+    <%= f.label :published, "Published (unpublished pages will not appear in the menus and require authentication to view. Published guides always appear in the \"Documentation\" menu)." %><br />
+    <%= f.select :published, options_for_select([["Yes", 1],["No", 0]], @guide.published? ? 1 : 0 ) %>
+  </div>
+  <div class="field">
+		<div class="inner">
+	    <%= f.label :desc, "Description" %><br />
+	    <%= f.text_area :desc, :size => "60x5" %>
+  	</div>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<%= javascript_tag do %>
+
+	$("#guide_title").change(function() {
+		var title = getTextForUrl("guide_title");
+		$("#guide_url").val(title);
+	});
+
+<% end %>

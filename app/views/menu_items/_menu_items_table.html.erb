@@ -1,0 +1,209 @@
+<div id="tabs">
+	<ul>
+		<li><%= link_to "What is GenomeSpace?", "#what-is-genomespace" %></li>
+		<li><%= link_to "Tools", "#tools" %></li>
+		<li><%= link_to "Documentation", "#documentation" %></li>
+		<li><%= link_to "Developers", "#developers" %></li>
+		<li><%= link_to "Support", "#support" %></li>
+		<li><%= link_to "About", "#about" %></li>
+	</ul>
+	<div id="what-is-genomespace">
+	<table class="menu_items_table" id="what_table">
+		<thead>
+			<th>Display Order</th>
+			<th>Page Title</th>
+			<th>Page URL</th>
+		</thead>
+		<tbody class="sortable">
+			<% @what_pages.each do |what| %>
+				<tr id="menu_item_<%= what.id %>">
+					<td><center><%= what.display_order %></center></td>
+					<td><%= Page.find(what.page_id).title %></td>
+					<td><%= Page.find(what.page_id).url %></td>
+				</tr>
+			<% end %>
+		</tbody>
+	</table>
+	</div>
+	<div id="tools">
+	<table class="menu_items_table" id="tools_table">
+		<thead>
+			<th>Display Order</th>
+			<th>Page Title</th>
+			<th>Page URL</th>
+		</thead>
+		<tbody class="sortable">
+			<% @tools_pages.each do |tool| %>
+				<tr id="menu_item_<%= tool.id %>">
+					<td><center><%= tool.display_order %></center></td>
+					<td><%= Page.find(tool.page_id).title %></td>
+					<td><%= Page.find(tool.page_id).url %></td>
+				</tr>
+			<% end %>
+		</tbody>
+	</table>
+	</div>
+	<div id="documentation">
+	<table class="menu_items_table" id="docs_table">
+		<thead>
+			<th>Display Order</th>
+			<th>Page Title</th>
+			<th>Page/Guide URL</th>
+		</thead>
+		<tbody class="sortable">
+			<% @doc_pages.each do |doc| %>
+				<tr id="menu_item_<%= doc.id %>">
+					<td><center><%= doc.display_order %></center></td>
+					<td><%= doc.guide_id.nil? ? Page.find(doc.page_id).title : Guide.find(doc.guide_id).title %></td>
+					<td><%= doc.guide_id.nil? ? Page.find(doc.page_id).url : support_guides_url(Guide.find(doc.guide_id)) %></td>
+				</tr>
+			<% end %>
+		</tbody>
+	</table>
+	</div>
+	<div id="developers">
+	<table class="menu_items_table" id="developers_table">
+		<thead>
+			<th>Display Order</th>
+			<th>Page Title</th>
+			<th>Page Url</th>
+		</thead>
+		<tbody class="sortable">
+			<% @developer_pages.each do |dev| %>
+				<tr id="menu_item_<%= dev.id %>">
+					<td><center><%= dev.display_order %></center></td>
+					<td><%= Page.find(dev.page_id).title %></td>
+					<td><%= Page.find(dev.page_id).url %></td>
+				</tr>
+			<% end %>
+		</tbody>
+	</table>
+	</div>
+	<div id="support">
+	<table class="menu_items_table" id="support_table">
+		<thead>
+			<th>Display Order</th>
+			<th>Page Title</th>
+			<th>Page URL</th>
+		</thead>
+		<tbody class="sortable">
+			<% @support_pages.each do |support| %>
+				<tr id="menu_item_<%= support.id %>">
+					<td><center><%= support.display_order %></center></td>
+					<td><%= Page.find(support.page_id).title %></td>
+					<td><%= Page.find(support.page_id).url %></td>
+				</tr>
+			<% end %>
+		</tbody>
+	</table>
+	</div>
+	<div id="about">
+	<table class="menu_items_table" id="about_table">
+		<thead>
+			<th>Display Order</th>
+			<th>Page Title</th>
+			<th>Page URL</th>
+		</thead>
+		<tbody class="sortable">
+			<% @about_pages.each do |about| %>
+				<tr id="menu_item_<%= about.id %>">
+					<td><center><%= about.display_order %></center></td>
+					<td><%= Page.find(about.page_id).title %></td>
+					<td><%= Page.find(about.page_id).url %></td>
+				</tr>
+			<% end %>
+		</tbody>
+	</table>
+	</div>
+</div>
+<%= javascript_tag do %>
+
+	$(function() { 
+	  $("#what_table tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "reorder_menu_items/what-is-genomespace",
+	  			data: $("#what_table tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+	
+	$(function() { 
+	  $("#tools_table tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "reorder_menu_items/tools",
+	  			data: $("#tools_table tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+	
+	$(function() { 
+	  $("#docs_table tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "reorder_menu_items/documentation",
+	  			data: $("#docs_table tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+	
+	$(function() { 
+	  $("#developers_table tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "reorder_menu_items/developers",
+	  			data: $("#developers_table tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+	
+	$(function() { 
+	  $("#support_table tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "reorder_menu_items/support",
+	  			data: $("#support_table tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+	
+	$(function() { 
+	  $("#about_table tbody.sortable").sortable({
+	  	update: function() {
+	  		$.ajax({
+	  			type: 'POST',
+	  			url: "reorder_menu_items/about",
+	  			data: $("#about_table tbody.sortable").sortable('serialize')
+	  		});
+	  	}
+	  }); 
+	});
+	
+	$(function() {
+		var cat = <%= menu_tabs.index(params[:category]).nil? ? 0 : menu_tabs.index(params[:category]) %>;
+		$( "#tabs" ).tabs( {selected: cat});
+	});
+	
+	$(document).ready(function() {
+		$('.menu_items_table').dataTable({
+	        "bJQueryUI": true,
+	        "bSort": false,
+	        "iDisplayLength": 100,
+	        "bFilter": false,
+	        "bLengthChange": false,
+	        "bPaginate": false
+	    });
+	} );
+	
+<% end %>

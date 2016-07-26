@@ -1,0 +1,16 @@
+<div id="bboard_buttons">
+  <% @slideshow_items.each do |slideshow_item| %>
+		<div class="bbbutton">
+      <div class="button_image">
+      	<%= link_to image_tag(slideshow_item.image.url(:thumb)), replace_selected_item_path(:id => slideshow_item.id), {:remote => true}  %>
+      </div>
+      <%= truncate(slideshow_item.title, :length => 25, :separator => " ", :omission => "") %>
+    </div>
+  <% end %>       
+</div>
+<div id="arrowUp">
+	<%= link_to_if(@control_offset - 12 >= 0, image_tag("arrowUp.png"), get_other_slideshow_items_path(:offset => @control_offset - 12), {:remote => true}) %>
+</div>
+<div id="arrowDown">
+	<%= link_to_if(@control_offset < slideshow_items_count, image_tag("arrowDown.png"), get_other_slideshow_items_path(:offset => @control_offset), {:remote => true}) %>
+</div>

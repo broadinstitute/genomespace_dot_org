@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  deliverable_id: 1
+  comments: MyText
+  approved_by: MyString
+
+two:
+  deliverable_id: 1
+  comments: MyText
+  approved_by: MyString

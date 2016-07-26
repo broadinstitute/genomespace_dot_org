@@ -1,0 +1,10 @@
+<table style="margin-left: -1px;border:none;border-collapse:collapse;"><tr><td>
+<h1>What would you like to edit?</h1></td> 
+<td><%= form_for(:action, :url => route_action_path) do %>
+<%= select_tag :action_path, options_for_select(available_actions), {:include_blank => true, :onchange => 'this.form.submit()'} %>
+<% end %></td></tr></table>
+<% available_actions.each do |action| %>
+	<% Rails.env == "production" ? @host = "www.genomespace.org" : @host = request.host_with_port %>
+	<h3><%= action.split("_").join(" ").capitalize %>: <%= link_to "http://" + @host + "/" + action, "http://" + @host + "/" + action %></h3>
+	<p><%= action.classify.constantize.admin_description.html_safe %></p>
+<% end %>

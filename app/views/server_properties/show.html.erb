@@ -1,0 +1,9 @@
+<p>
+  <b>Content:</b>
+  <% @server_property.content.split("\n").each do |line| %>
+  	<%= line %><br />
+  <% end %></p>
+
+
+<%= link_to 'Edit', edit_server_property_path(@server_property) %> |
+<%= link_to 'Back', server_properties_path %>

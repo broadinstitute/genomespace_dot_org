@@ -1,0 +1,5 @@
+genomespace_new.esproj/
+tmp/
+log/
+vendor/
+

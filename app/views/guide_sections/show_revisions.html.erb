@@ -1,0 +1,61 @@
+<h1>Listing Revisions for "<em><%= @guide_section.title %></em>"</h1>
+
+<table id="pages">
+	<thead>
+	<tr>
+		<th>Revision</th>
+	  <th>Changes</th>
+	  <th>Updated By</th>
+	  <th>Revert</th>
+	</tr>
+	</thead>
+	<tbody>
+	<% @revisions.each do |rev| %>
+	<tr>
+		<td><%= rev.number %></td>
+		<td>
+			<% unless rev.changes.blank? || rev.changes.is_a?(String) %>
+				<% rev.changes.each do |k,v| %>
+					<% unless k == "delta" || k == "lock_version" || k =~ /content/ %>
+						<% @diff = Differ.diff_by_line(v[1].to_s, v[0].to_s) %>
+						<%= "<em><strong>#{k}:</strong></em>".html_safe %><br />
+						<% @results = Hpricot(@diff.format_as(:html)) %>
+						<% @results.search("[@class='differ']").each do |r| %>
+							<%= r.to_html.html_safe %><br />
+						<% end %>
+					<% end %>
+					<% if k =~ /content/ %>
+						<%= "<em><strong>#{k}:</strong></em> View Changes ".html_safe %><%= link_to image_tag("view.gif"), diff_guide_section_content_path(@guide, @guide_section, rev.number - 1), {:title => "View changes"} %><br />
+					<% end %>
+				<% end %>
+			<% else %>
+				N/A
+			<% end %>
+		</td>
+		<td><%= rev.user_name %></td>
+		<td><%= rev.number == @guide_section.version ? "Current" : link_to("Revert", revert_guide_section_revisions_path(@guide.id, @guide_section.id, rev.number), confirm: "Are you sure you want to revert to revision ##{rev.number}?  This will create a new revision (##{@guide_section.version + 1}) with that content." ) %></td>
+	</tr>
+	<% end %>
+	<!-- Hard coded link to version #1 since this doesn't exist discretely in the database -->
+	<tr>
+		<td>1</td>
+		<td>N/A</td>
+		<td>N/A</td>
+		<td><%= link_to "Revert", revert_guide_section_revisions_path(@guide.id, @guide_section.id, 1), confirm: "Are you sure you want to revert to revision #1?  This will create a new revision (##{@guide_section.version + 1}) with that content."  %></td>
+	</tr>
+	</tbody>
+</table>
+
+<%= javascript_tag do %>
+
+	$(document).ready(function() {
+	    oTable = $('#pages').dataTable({
+	        "bJQueryUI": true,
+	        "sPaginationType": "full_numbers",
+	        "aaSorting": [[0, "desc"]]
+	    });
+	} );
+
+<% end %>
+<br />
+<%= link_to "Back", guide_guide_sections_path %>

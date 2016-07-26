@@ -1,0 +1,47 @@
+<%= form_for(@system_message) do |f| %>
+  <% if @system_message.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@system_message.errors.count, "error") %> prohibited this system_message from being saved:</h2>
+
+      <ul>
+      <% @system_message.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :content %><br />
+    <%= f.cktext_area :content %>
+  </div>
+  <div class="field">
+  	<%= f.label :priority %><br />
+  	<%= f.select :priority, options_for_select(["general", "urgent"], @system_message.priority) %>
+  </div>
+  <div class="field">
+  	<%= f.label :expriation_date, "Expires On (leave this blank if you don't want the message to expire)" %><br />
+  	<%= f.text_field :expiration_date, {:id => "datepicker"} %>
+  </div>
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+<% end %>
+
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.system_message_content.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+		
+<% end %>
+
+<%= javascript_tag do %>
+
+	$(function() {
+		$("#datepicker").datetimepicker({dateFormat : "yy-mm-dd", timeFormat: "hh:mm"});
+	});
+
+<% end %>

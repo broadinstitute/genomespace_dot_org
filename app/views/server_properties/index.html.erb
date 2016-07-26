@@ -1,0 +1,12 @@
+<h1>GenomeSpace Server URL Properties</h1>
+<% unless @server_property.nil? %>
+	<%= button_to 'Edit Current Server URL Properties', edit_server_property_path(@server_property), method: :get %>
+	<h3>Content:</h3>
+	<% @server_property.content.split("\n").each do |line| %>
+		<%= line %><br />
+	<% end %>
+<% else %>
+	<h3 id="alert">There are currently no defined server url properties.  Please create a record.</h3>
+	<%= button_to 'New Server property', new_server_property_path, method: :get %>
+<% end %>
+

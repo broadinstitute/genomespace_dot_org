@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GenomeSpace: <%= "#{controller.controller_name.capitalize}: #{controller.action_name.capitalize}" %></title>
+  <%= stylesheet_link_tag    "application" %>
+  <%= javascript_include_tag "application" %>
+	<%= favicon_link_tag asset_path("favicon.ico") %>
+  <%= csrf_meta_tags %>
+</head>
+<body class="admin">
+
+<p id="notice"><%= notice %></p>
+<p id="alert"><%= alert %></p>
+	<div id="admin_nav">
+		<table>
+			<tr><td>
+				<%= form_for(:action, :url => route_action_path) do %>
+				<%= label_tag :action_path, "Edit:" %>
+				<%= select_tag :action_path, options_for_select(available_actions), {:include_blank => true, :onchange => 'this.form.submit()'} %>
+				<% end %>
+			</td><td>
+				<%= button_to "View Live Site", site_path, {:method => "get"} %>
+			</td><td>
+				<%= button_to "Logout: #{current_user.username}", destroy_user_session_path, {:method => "delete"} %>
+			</td></tr>
+		</table>
+	</div>
+<%= yield %>
+<%= javascript_tag do %>
+	$(document).ready(function() {
+		$("a.toggle_link").click(function() {
+			var image = $(this).children("img");
+			$(image).attr("src", $(image).attr("src") == "/assets/plus.png" ? "/assets/minus.png" : "/assets/plus.png");
+		});
+	});
+<% end %>
+</body>
+</html>

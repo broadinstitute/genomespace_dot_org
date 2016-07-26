@@ -1,0 +1,23 @@
+# Sample localization file for English. Add more files in this directory for other locales.
+# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
+
+en:
+  hello: "Hello world"
+  
+  activerecord:
+      attributes:
+        user:  
+          login: "Username or email"
+ 
+  will_paginate:
+    page_entries_info:
+      single_page:
+        zero:  "No results found"
+        one:   "Displaying 1 result"
+        other: "Displaying all %{count} results"
+      single_page_html:
+        zero:  "No results found"
+        one:   "Displaying <strong>1</strong> result"
+        other: "Displaying <strong>all&nbsp;%{count}</strong> results"
+      multi_page: "Displaying results %{from} - %{to} of %{count} in total"
+      multi_page_html: "Displaying results <strong>%{from}&nbsp;-&nbsp;%{to}</strong> of <strong>%{count}</strong> in total"

@@ -1,0 +1,75 @@
+<div class="front_main">		
+	<p id="notice" class="inline"><%= notice %></p>
+	<p id="alert" class="inline"><%= alert %></p>
+		<% unless @system_message.nil? %>
+			<div class="status-wrapper">
+				<h2>STATUS <%= link_to image_tag("rss_small.gif"), "/system-status.atom" %></h2>&nbsp;<p style="display:inline;"><%= link_to @system_message.display_date, "/system-status" %>&nbsp;<%= @system_message.priority == "urgent" ? image_tag("urgent.png", title: "Urgent Priority Status Message") : image_tag("general.png", title: "General Priority Status Message") %></p>
+		
+				<span class="status"><%= @system_message.content.html_safe %></span>
+			</div>
+		<% end %>
+		
+	</div>
+	<div class="front_main">
+    	<h2>Citing GenomeSpace</h2>
+    	<div id="cite_gs">
+    	    To cite your use of GenomeSpace, please reference Qu K, Garamszegi S, Wu F, et al. <a href="http://www.nature.com/nmeth/journal/vaop/ncurrent/full/nmeth.3732.html" target="_blank"> Nature Methods. 2016 Jan 18. doi: 10.1038/nmeth.3732. </a>
+    	</div>
+    </div>
+	<div class="front_main">
+	<h2>WHAT'S NEW</h2>
+	<div id="highlights_blog">
+	
+		<ul>
+			<li><%= link_to "News Highlights", "#highlights" %></li>
+			<li><%= link_to "GenomeSpace Blog", "#blog" %></li>
+			<!-- <li><%= link_to "Videos", "#videos" %></li>	-->
+		</ul>
+		<div id="highlights">
+			<% unless @highlights.blank? %>
+				<% @highlights.each do |highlight| %>
+					<h3><%= link_to highlight.title, highlight_url(highlight) %></h3>
+					<p><%= Hpricot(highlight.content).at("p").inner_html.html_safe %>&nbsp;&nbsp;<%= link_to "More >>", highlight_url(highlight) %></p>
+				<% end %>
+				<%= link_to "See All News Highlights", "/news/" %>
+			<% end %>
+		</div>
+		<div id="blog">
+			<% unless @posts.blank? %>
+				<% @posts.each do |post| %>
+					<h3><%= link_to post.title, post_url(post) %></h3>
+					<p class="byline">Posted by <%= post.author %> on <%= post.display_date %>
+					<p><%= Hpricot(post.content).at("p").html.html_safe %>&nbsp;&nbsp;<%= link_to "More >>", post_url(post) %></p>
+				<% end %>
+				<%= link_to "See All Posts", "/blog/" %>
+			<% end %>
+		</div>
+
+	</div>
+</div>
+<td>
+<div id="follow">
+	<%= link_to image_tag("twitter.png", :alt => "twitter"), "http://www.twitter.com/genomespace" %>
+	<%= link_to image_tag("facebook.png", :alt => "facebook"), "http://www.facebook.com/pages/GenomeSpace/148020715229991" %>
+	<%= link_to image_tag("rss.png", :alt => "rss"), "http://www.rssitfor.me/getrss?name=%40genomespace" %>
+	<%= link_to image_tag("email.png", :alt => "email"), support_path %>
+</div>
+
+<div id="news">
+	<ul>
+		<li><%= link_to "@genomespace", "#profile" %></li>
+		<li><%= link_to "Mentions", "#search" %></li>
+	</ul>
+	<div id="profile">
+		<a class="twitter-timeline" href="https://twitter.com/genomespace" data-widget-id="312270249808498688" data-chrome="noheader nofooter noborders">Tweets by @genomespace</a>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+		
+	</div>
+	<div id="search">
+		<a class="twitter-timeline" href="https://twitter.com/search?q=GenomeSpace" data-widget-id="312271597627121664" data-chrome="noheader nofooter noborders">Tweets about "GenomeSpace"</a>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+		
+	</div>
+</div>
+</td>
+</tr>

@@ -1,0 +1,64 @@
+// Place all the styles related to the pages controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+body.admin {
+	color: #333;
+	font-family: Helvetica, Arial, Verdana, Geneva, sans-serif;
+	font-size: 13px;
+	line-height: 18px; 
+	margin: 10px;
+}
+
+body.admin textarea {
+	width: 99%;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+	border: 1px solid #ababab;
+	padding: 5px 0 5px 5px;
+	behavior: url(/assets/PIE.htc);
+}
+
+.inner {
+	background: -webkit-gradient(linear, left bottom, left top, from(#ababab), to(#eee));
+	background: -moz-linear-gradient(bottom,  #ababab,  #eee);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ababab', endColorstr='#eee');
+	background-color: #cdcdcd;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+	padding: 5px 0 5px 5px;
+	border: 1px solid #888;
+	behavior: url(/assets/PIE.htc);
+}
+
+#pages {
+	width: 100%;
+	border-collapse: collapse;
+	border-left: 1px solid #cdcdcd;
+	border-right: 1px solid #cdcdcd;
+}
+
+.file_list {
+	width: 600px;
+	border: 1px solid darkgrey;
+}
+
+#pages td, #pages th {
+	padding: 5px;
+}
+
+#admin_footer {
+	clear: both;
+	margin-top: 10px;
+}
+
+del {
+	background-color: red;
+}
+
+ins {
+	background-color: yellow;
+}
+

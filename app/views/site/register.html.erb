@@ -1,0 +1,18 @@
+<h1>Register for a GenomeSpace account</h1>
+<p>Use this form to sign up for a GenomeSpace account.  Once registered, you will be able to log into GenomeSpace from the GenomeSpace User Interface or from any of the GenomeSpace tools.</p>
+
+<%= form_for :account do |f| %>
+	<table><tr>
+	<td><%= f.label :username %></td>
+	<td><%= f.text_field :username, :value => @username.nil? ? nil : @username %></td></tr><tr>
+	<td><%= f.label :email %></td>
+	<td><%= f.text_field :email, :value => @email.nil? ? nil : @email %></td></tr><tr>
+	<td><%= f.label :password %></td>
+	<td><%= f.password_field :password %></td></tr><tr>
+	<td><%= f.label :password_confirm %></td>
+	<td><%= f.password_field :password_confirm %></td></tr>
+	</table>
+	<br />
+	<%= f.submit "Register" %>
+
+<% end %>

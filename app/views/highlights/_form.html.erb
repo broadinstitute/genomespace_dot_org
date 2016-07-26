@@ -1,0 +1,50 @@
+<%= form_for(@highlight) do |f| %>
+  <% if @highlight.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@highlight.errors.count, "error") %> prohibited this highlight from being saved:</h2>
+
+      <ul>
+      <% @highlight.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+	<%= f.hidden_field :lock_version %>
+  <div class="field">
+    <%= f.label :title %><br />
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+    <%= f.label :url, "URL (you can leave this blank to auto-generate a url based on the title)." %><br />
+    <%= f.text_field :url %>
+  </div>
+  <div class="field">
+    <%= f.label :dev, "Version in Dev (setting this flag will only make this highlight viewable to logged-in users." %><br />
+    <%= f.select :dev, options_for_select([["Yes", 1],["No", 0]], @highlight.dev? ? ["Yes", 1] : ["No", 0]) %>
+  </div>
+  <div class="field">
+    <%= f.label :content %><br />
+    <%= f.cktext_area :content %>
+  </div>
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+  <%= f.hidden_field :created_by, :value => current_user.email %>
+  
+<% end %>
+
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.highlight_content.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+		
+		$("#highlight_title").change(function() {
+			var title = getTextForUrl("highlight_title");
+			$("#highlight_url").val(title);
+		});
+
+<% end %>

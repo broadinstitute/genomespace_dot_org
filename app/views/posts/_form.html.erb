@@ -1,0 +1,63 @@
+<%= form_for(@post) do |f| %>
+  <% if @post.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@post.errors.count, "error") %> prohibited this post from being saved:</h2>
+
+      <ul>
+      <% @post.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+	<%= f.hidden_field :lock_version %>
+  <div class="field">
+    <%= f.label :title, "Title (this will be used to auto-generate a url along with today's date which is already prefilled." %><br />
+    <%= f.text_field :title %>
+  </div>
+  <div class="field">
+    <%= f.label :url %><br />
+    <%= f.text_field :url, size: 50 %>
+  </div>
+  <div class="field">
+    <%= f.label :author %><br />
+    <%= f.text_field :author %>
+  </div>
+  <div class="field">
+    <%= f.label :published, "Published? (unpublished posts will not appear in the blog and require authentication to view)" %><br />
+    <%= f.select :published, options_for_select([["Yes", 1],["No", 0]], @post.published? ? ["Yes", 1] : ["No", 0]) %>
+  </div>
+  <div class="field">
+    <%= f.label :content %><br />
+    <%= f.cktext_area :content %>
+  </div>
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+<% end %>
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.post_content.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+		
+		$(document).ready(function() {
+			
+			if ( <%= @post.new_record? %> ) {
+				var date = '<%= Time.now.strftime("%Y/%m/%d") + "/" %>';
+				var title = getTextForUrl("post_title");
+				$("#post_url").val(date + title);
+			} 
+							
+			$("#post_title").change(function() {
+				var title = getTextForUrl("post_title");
+				old_url_parts = $("#post_url").val().split("/");
+				old_url_parts.pop();
+				previous_date = old_url_parts.join("/") + "/";
+				$("#post_url").val(previous_date + title);
+			});
+		});
+
+<% end %>

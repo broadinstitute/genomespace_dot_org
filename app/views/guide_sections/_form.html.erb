@@ -1,0 +1,58 @@
+<%= form_for([@guide, @guide_section]) do |f| %>
+  <% if @guide_section.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@guide_section.errors.count, "error") %> prohibited this guide_section from being saved:</h2>
+
+      <ul>
+      <% @guide_section.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= f.hidden_field :guide_id, :value => params[:guide_id] %>
+  <%= f.hidden_field :lock_version %>
+	<div class="field">
+	  <%= f.label :title %><br />
+	  <%= f.text_field :title %>
+	</div>
+	<div class="field">
+	  <%= f.label :display_url, "Display URL (you can leave this blank to auto-generate a url based on the guide section title)" %><br />
+	  <%= f.text_field :display_url %>
+	</div>
+	<div class="field">
+	  <%= f.label :display_order, "Display Order (this is only editable from the index view)" %><br />
+	  <%= f.text_field :display_order, :readonly => true, :value => @guide_section.display_order.nil? ? GuideSection.get_next_display_order(params[:guide_id]) : @guide_section.display_order %>
+	</div>
+	<div class="field">
+	  <%= f.label :dev, "Version in Dev (setting this flag will only make this revision viewable to logged-in users.  All other users see the last live version)?" %><br />
+	  <%= f.select :dev, options_for_select([["Yes", 1],["No", 0]], @guide_section.dev? ? ["Yes", 1] : ["No", 0]) %>
+	</div>
+	<div class="field">
+	  <%= f.label :published, "Published? (unpublished guide sections will not appear publicly in the guide and require authentication to view)" %><br />
+	  <%= f.select :published, options_for_select([["Yes", 1],["No", 0]], @guide_section.published? ? ["Yes", 1] : ["No", 0]) %>
+	</div>
+	<div class="field">
+	  <%= f.label :content %><br />
+	  <%= f.cktext_area :content %>
+	</div>
+	<%= f.hidden_field :created_by, :value => current_user.email %>
+	<%= f.hidden_field :updated_by, :value => current_user.email %>
+  <div class="actions">
+    <%= f.submit nil, {:onclick => "confirmUpdate();"} %>
+  </div>
+<% end %>
+<%= javascript_tag do %>
+	
+		window.onbeforeunload = function() {
+			if (CKEDITOR.instances.guide_section_content.checkDirty() && update == false ) {
+				return "You have unsaved changes."
+			};
+		};
+		
+		$("#guide_section_title").change(function() {
+			var title = getTextForUrl("guide_section_title");
+			$("#guide_section_display_url").val(title);
+		});
+
+<% end %>

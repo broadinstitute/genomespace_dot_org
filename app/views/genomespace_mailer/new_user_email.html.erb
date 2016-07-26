@@ -1,0 +1,11 @@
+<p>This email is to notify you that an account has been created for you on www.genomespace.org.  This account will allow you access to various administrative features on the website, as well as the public GenomeSpace forums.  Your account details are as follows:</p>
+<p>Login: <%= @user.email %><br />
+Password: <%= @password %><br />
+CMS Admin Access: <%= @user.cms_admin? %><br />
+Deliverables Admin Access: <%= @user.deliverables_admin? %>
+Super Admin Status: <%= @user.super_admin? %></p>
+
+<p>Please visit <%= "<a href=\"http://#{@host}/users/sign_in\">http://#{@host}/users/sign_in</a>".html_safe %> to log in.  You can change your password by clicking the "Forgot Your Password?" link below the Sign In button.</p>
+
+<p>Best,<br />
+<p>The GenomeSpace Team</p>

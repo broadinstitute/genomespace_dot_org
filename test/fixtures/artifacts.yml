@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  deliverable_id: 1
+  link: MyString
+
+two:
+  deliverable_id: 1
+  link: MyString

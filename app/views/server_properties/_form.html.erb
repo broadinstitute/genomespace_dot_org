@@ -1,0 +1,23 @@
+<%= form_for(@server_property) do |f| %>
+  <% if @server_property.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@server_property.errors.count, "error") %> prohibited this server_property from being saved:</h2>
+
+      <ul>
+      <% @server_property.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+  	<div class="inner">
+    	<%= f.label :content %><br />
+    	<%= f.text_area :content, size: "100x30" %>
+    </div>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

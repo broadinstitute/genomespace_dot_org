@@ -1,0 +1,17 @@
+<%= form_for :select do |f| %>
+	<span>
+	<%= f.label :component, "Select Version:", {:class => "inline"} %>
+	<%= f.select :component, options_from_collection_for_select(@previous_versions, :url, :get_version, @doc.url), {:class => "inline"}%>
+	<%= f.submit "Display", {:class => "inline"} %>&nbsp;|&nbsp;
+	<p class="inline"><%= link_to "Back", "/adopters" %></p>
+	</span>
+<% end %>
+<hr />
+<h1><%= @doc.component %> (version <%= @doc.get_version %>)
+	<% if user_signed_in? %>
+		<%= current_user.cms_admin? ? edit_button(@doc) : nil %>
+	<% end %>
+</h1>
+<%= @doc.deprecated? ? "<h2 style='color: red;'>THIS API HAS BEEN DEPRECATED</h2>".html_safe : nil %>
+<%= @doc.dev? ? "<p style='color: red;'>This doc is a dev revision.</p>".html_safe : nil %>
+<%= @doc.contents.html_safe %>
